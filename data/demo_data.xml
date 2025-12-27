@@ -78,9 +78,7 @@
     <record id="team_mechanics" model="maintenance.team">
         <field name="name">Mechanics</field>
         <field name="color">1</field>
-        <!-- TODO: Add member_ids when demo users are available
         <field name="member_ids" eval="[(6, 0, [ref('base.user_admin')])]"/>
-        -->
     </record>
 
     <record id="team_it_support" model="maintenance.team">
@@ -122,7 +120,7 @@
         <field name="purchase_date">2023-01-15</field>
         <field name="warranty_date">2026-01-15</field>
         <field name="state">operational</field>
-        <field name="notes">&lt;p&gt;High-precision CNC milling machine. Requires monthly lubrication.&lt;/p&gt;</field>
+        <field name="notes"><![CDATA[<p>High-precision CNC milling machine. Requires monthly lubrication.</p>]]></field>
     </record>
 
     <!-- Laser Cutter - Production, Mechanics -->
@@ -187,7 +185,7 @@
         <field name="location">Building A, Storage</field>
         <field name="purchase_date">1999-05-01</field>
         <field name="state">maintenance</field>
-        <field name="notes">&lt;p&gt;Old equipment, frequent breakdowns. Consider replacement.&lt;/p&gt;</field>
+        <field name="notes"><![CDATA[<p>Old equipment, frequent breakdowns. Consider replacement.</p>]]></field>
     </record>
 
     <!-- Equipment with WARRANTY EXPIRING SOON (for demo) -->
@@ -220,7 +218,7 @@
     <!-- Request 1: Oil Leak - In Progress -->
     <record id="request_oil_leak" model="maintenance.request">
         <field name="name">Oil Leak in Hydraulic System</field>
-        <field name="description">&lt;p&gt;Noticed oil leaking from the hydraulic system. Machine is operational but needs attention soon.&lt;/p&gt;</field>
+        <field name="description"><![CDATA[<p>Noticed oil leaking from the hydraulic system. Machine is operational but needs attention soon.</p>]]></field>
         <field name="equipment_id" ref="equipment_cnc_machine"/>
         <field name="category_id" ref="category_machinery"/>
         <field name="maintenance_team_id" ref="team_mechanics"/>
@@ -236,7 +234,7 @@
     <!-- Request 2: Paper Jam - OVERDUE (for red indicator demo) -->
     <record id="request_paper_jam" model="maintenance.request">
         <field name="name">Paper Jam - Frequent Errors</field>
-        <field name="description">&lt;p&gt;Printer keeps jamming. Error codes P2 and P5 appearing frequently.&lt;/p&gt;</field>
+        <field name="description"><![CDATA[<p>Printer keeps jamming. Error codes P2 and P5 appearing frequently.</p>]]></field>
         <field name="equipment_id" ref="equipment_printer"/>
         <field name="category_id" ref="category_it_equipment"/>
         <field name="maintenance_team_id" ref="team_it_support"/>
@@ -251,7 +249,7 @@
     <!-- Request 3: Monthly Checkup - Preventive, scheduled next week -->
     <record id="request_monthly_checkup" model="maintenance.request">
         <field name="name">Monthly Checkup - Laser Cutter</field>
-        <field name="description">&lt;p&gt;Regular monthly preventive maintenance. Check lens alignment, clean filters, verify calibration.&lt;/p&gt;</field>
+        <field name="description"><![CDATA[<p>Regular monthly preventive maintenance. Check lens alignment, clean filters, verify calibration.</p>]]></field>
         <field name="equipment_id" ref="equipment_laser_cutter"/>
         <field name="category_id" ref="category_machinery"/>
         <field name="maintenance_team_id" ref="team_mechanics"/>
@@ -265,7 +263,7 @@
     <!-- Request 4: Battery Replacement - Repaired (completed) -->
     <record id="request_battery" model="maintenance.request">
         <field name="name">Battery Replacement</field>
-        <field name="description">&lt;p&gt;Laptop battery no longer holding charge. Replaced with new OEM battery.&lt;/p&gt;</field>
+        <field name="description"><![CDATA[<p>Laptop battery no longer holding charge. Replaced with new OEM battery.</p>]]></field>
         <field name="equipment_id" ref="equipment_laptop"/>
         <field name="category_id" ref="category_it_equipment"/>
         <field name="maintenance_team_id" ref="team_it_support"/>
@@ -282,7 +280,7 @@
     <!-- Request 5: Filter Cleaning - Preventive, tomorrow -->
     <record id="request_filter_cleaning" model="maintenance.request">
         <field name="name">Quarterly Filter Cleaning</field>
-        <field name="description">&lt;p&gt;Quarterly cleaning of HVAC filters. Check refrigerant levels.&lt;/p&gt;</field>
+        <field name="description"><![CDATA[<p>Quarterly cleaning of HVAC filters. Check refrigerant levels.</p>]]></field>
         <field name="equipment_id" ref="equipment_hvac"/>
         <field name="category_id" ref="category_hvac"/>
         <field name="maintenance_team_id" ref="team_electricians"/>
@@ -296,7 +294,7 @@
     <!-- Request 6: Motor Failure - FOR SCRAP DEMO -->
     <record id="request_motor_failure" model="maintenance.request">
         <field name="name">Motor Failure - Beyond Repair</field>
-        <field name="description">&lt;p&gt;Main motor has failed. Cost of repair exceeds equipment value. Recommend scrapping.&lt;/p&gt;</field>
+        <field name="description"><![CDATA[<p>Main motor has failed. Cost of repair exceeds equipment value. Recommend scrapping.</p>]]></field>
         <field name="equipment_id" ref="equipment_old_machine"/>
         <field name="category_id" ref="category_machinery"/>
         <field name="maintenance_team_id" ref="team_mechanics"/>

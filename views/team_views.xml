@@ -229,6 +229,7 @@
         <field name="name">Maintenance Teams</field>
         <field name="res_model">maintenance.team</field>
         <field name="view_mode">kanban,tree,form</field>
+        <field name="search_view_id" ref="maintenance_team_search"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create your first maintenance team

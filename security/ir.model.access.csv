@@ -50,6 +50,7 @@ access_maintenance_request_manager,maintenance.request.manager,model_maintenance
 # ------------------------------------------------------------------------------
 # Wizard (Transient Models)
 # ------------------------------------------------------------------------------
+access_warranty_alert_wizard_user,maintenance.warranty.alert.wizard.user,model_maintenance_warranty_alert_wizard,gearguard.group_maintenance_user,1,1,1,0
 access_warranty_alert_wizard_manager,maintenance.warranty.alert.wizard.manager,model_maintenance_warranty_alert_wizard,gearguard.group_maintenance_manager,1,1,1,1
 
 # ------------------------------------------------------------------------------

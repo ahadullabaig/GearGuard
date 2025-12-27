@@ -352,8 +352,9 @@ class MaintenanceRequest(models.Model):
 
     cost_labor_rate = fields.Float(
         string='Labor Rate (per hour)',
-        default=50.0,  # TODO: Make this configurable via settings
-        help="Hourly rate for labor cost calculation"
+        default=lambda self: self._get_default_labor_rate(),
+        help="Hourly rate for labor cost calculation. "
+             "Default from system parameter 'maintenance.default_labor_rate' or 50.0"
     )
 
     cost_labor = fields.Float(
@@ -533,19 +534,24 @@ class MaintenanceRequest(models.Model):
                             message_type='notification',
                         )
 
-            # AUTO-ASSIGN ON IN_PROGRESS
-            if new_stage == 'in_progress':
-                if 'technician_id' not in vals:
-                    for request in self:
-                        if not request.technician_id:
-                            vals['technician_id'] = self.env.uid
-
             # SET CLOSE_DATE ON REPAIRED
             if new_stage == 'repaired':
                 if 'close_date' not in vals:
                     vals['close_date'] = fields.Date.today()
 
-        return super().write(vals)
+        result = super().write(vals)
+
+        # AUTO-ASSIGN ON IN_PROGRESS (done after write to handle per-record assignment)
+        if 'stage' in vals and vals['stage'] == 'in_progress':
+            for request in self:
+                if not request.technician_id:
+                    # Prefer first team member, fallback to current user
+                    if request.maintenance_team_id and request.maintenance_team_id.member_ids:
+                        request.technician_id = request.maintenance_team_id.member_ids[0]
+                    else:
+                        request.technician_id = self.env.user
+
+        return result
 
     @api.model
     def create(self, vals):
@@ -564,26 +570,25 @@ class MaintenanceRequest(models.Model):
     def action_start_maintenance(self):
         """
         Button action to move request from 'new' to 'in_progress'.
+        Technician auto-assignment is handled by write() method.
         """
         for request in self:
             if request.stage == 'new':
-                request.write({
-                    'stage': 'in_progress',
-                    'technician_id': request.technician_id.id or self.env.uid,
-                })
+                request.write({'stage': 'in_progress'})
 
     def action_complete_maintenance(self):
         """
         Button action to mark request as 'repaired'.
 
         VALIDATION:
-        - Duration should be > 0 (warn if not)
+        - Duration must be > 0 to complete maintenance
         """
         for request in self:
             if request.stage == 'in_progress':
                 if not request.duration:
-                    # Optional: You can make this a hard requirement
-                    pass  # Just warn, don't block
+                    raise UserError(
+                        _("Please enter the duration (hours) before completing maintenance.")
+                    )
                 request.write({
                     'stage': 'repaired',
                     'close_date': fields.Date.today(),
@@ -617,6 +622,21 @@ class MaintenanceRequest(models.Model):
         This is required for proper Kanban drag-and-drop functionality.
         """
         return [key for key, val in self.STAGE_SELECTION]
+
+    @api.model
+    def _get_default_labor_rate(self):
+        """
+        Get default labor rate from system parameters.
+        Configurable via Settings > Technical > Parameters > System Parameters.
+        Key: maintenance.default_labor_rate
+        """
+        config_param = self.env['ir.config_parameter'].sudo().get_param(
+            'maintenance.default_labor_rate', default='50.0'
+        )
+        try:
+            return float(config_param)
+        except (ValueError, TypeError):
+            return 50.0
 
     def _get_overdue_requests(self):
         """

@@ -338,16 +338,15 @@ class MaintenanceEquipment(models.Model):
     # COMPUTE METHODS
     # ==========================================================================
 
-    @api.depends('request_ids', 'request_ids.stage')
+    @api.depends('request_ids', 'request_ids.stage', 'request_ids.active')
     def _compute_request_counts(self):
         """
         Compute total and open request counts for smart button.
+        Uses the One2many relationship directly to avoid N+1 queries.
         """
         for equipment in self:
-            requests = self.env['maintenance.request'].search([
-                ('equipment_id', '=', equipment.id),
-                ('active', '=', True)
-            ])
+            # Use the One2many relationship instead of search to avoid N+1 queries
+            requests = equipment.request_ids.filtered(lambda r: r.active)
             equipment.request_count = len(requests)
             equipment.open_request_count = len(requests.filtered(
                 lambda r: r.stage not in ('repaired', 'scrap')
@@ -390,33 +389,34 @@ class MaintenanceEquipment(models.Model):
                 else:
                     equipment.warranty_state = 'valid'
 
-    @api.depends('request_ids', 'request_ids.cost_total', 'request_ids.duration', 'request_ids.close_date', 'request_ids.stage')
+    @api.depends('request_ids', 'request_ids.cost_total', 'request_ids.duration',
+                 'request_ids.close_date', 'request_ids.stage', 'request_ids.active')
     def _compute_maintenance_stats(self):
         """
         Compute maintenance statistics for equipment history.
+        Uses the One2many relationship directly to avoid N+1 queries.
         """
         for equipment in self:
-            requests = self.env['maintenance.request'].search([
-                ('equipment_id', '=', equipment.id),
-                ('stage', '=', 'repaired'),
-                ('active', '=', True)
-            ])
+            # Use the One2many relationship instead of search to avoid N+1 queries
+            requests = equipment.request_ids.filtered(
+                lambda r: r.active and r.stage == 'repaired'
+            )
             equipment.total_maintenance_cost = sum(requests.mapped('cost_total'))
             equipment.total_downtime = sum(requests.mapped('duration'))
 
-            if requests:
-                equipment.last_maintenance_date = max(requests.mapped('close_date') or [False])
+            # Get close_dates first to handle edge cases properly
+            close_dates = [r.close_date for r in requests if r.close_date]
+            if close_dates:
+                equipment.last_maintenance_date = max(close_dates)
                 # MTBF calculation (average days between repairs)
-                close_dates = sorted([r.close_date for r in requests if r.close_date])
                 if len(close_dates) > 1:
-                    deltas = [(close_dates[i+1] - close_dates[i]).days
-                              for i in range(len(close_dates)-1)]
-                    equipment.mtbf = sum(deltas) / len(deltas)
+                    sorted_dates = sorted(close_dates)
+                    deltas = [(sorted_dates[i+1] - sorted_dates[i]).days
+                              for i in range(len(sorted_dates)-1)]
+                    equipment.mtbf = sum(deltas) / len(deltas) if deltas else 0
                 else:
                     equipment.mtbf = 0
             else:
-                equipment.total_maintenance_cost = 0
-                equipment.total_downtime = 0
                 equipment.last_maintenance_date = False
                 equipment.mtbf = 0
 
@@ -492,15 +492,17 @@ class MaintenanceEquipment(models.Model):
         - Button type: "object" (calls this method)
         """
         self.ensure_one()
-        # TODO: Implement action
         return {
             'type': 'ir.actions.act_window',
             'name': _('Maintenance Requests'),
             'res_model': 'maintenance.request',
-            'view_mode': 'tree,form',
+            'view_mode': 'kanban,tree,form,calendar',
             'domain': [('equipment_id', '=', self.id)],
             'context': {
                 'default_equipment_id': self.id,
+                'default_maintenance_team_id': self.maintenance_team_id.id,
+                'default_technician_id': self.technician_id.id if self.technician_id else False,
+                'default_category_id': self.category_id.id if self.category_id else False,
             },
         }
 
@@ -540,16 +542,21 @@ class MaintenanceEquipment(models.Model):
     def _check_owner(self):
         """
         Validate that owner is set correctly based on owner_type.
+        When owner_type is set, the corresponding field should be populated.
         """
         for equipment in self:
             if equipment.owner_type == 'department' and not equipment.department_id:
-                pass  # Department is optional
+                raise ValidationError(
+                    _("Please select a Department when Owner Type is 'Department'.")
+                )
             if equipment.owner_type == 'employee' and not equipment.employee_id:
-                pass  # Employee is optional
+                raise ValidationError(
+                    _("Please select an Employee when Owner Type is 'Employee'.")
+                )
 
     _sql_constraints = [
-        ('serial_unique', 'UNIQUE(serial_number)',
-         'Serial number must be unique!'),
+        ('serial_unique', 'UNIQUE(serial_number, company_id)',
+         'Serial number must be unique per company!'),
     ]
 
     # ==========================================================================
