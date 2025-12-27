@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+    ============================================================================
+    EQUIPMENT CATEGORY VIEWS
+    ============================================================================
+
+    File: views/equipment_category_views.xml
+    Model: maintenance.equipment.category
+    Priority: LOW (simple supporting model)
+
+    VIEWS TO IMPLEMENT:
+    1. Form View - Simple form with name, color, notes
+    2. Tree View - List with name and equipment count
+    3. Search View - Basic search on name
+
+    IMPORTANT: Kanban view is optional for categories.
+    Focus on Equipment and Request views first.
+    ============================================================================
+    -->
+
+    <!-- ===================================================================== -->
+    <!-- FORM VIEW                                                             -->
+    <!-- ===================================================================== -->
+    <!--
+    INSTRUCTIONS:
+    - Simple form with name field prominent
+    - Color picker widget for the color field
+    - Notes field at bottom
+    - Smart button to view equipment in this category (optional)
+
+    EXAMPLE STRUCTURE:
+    ```xml
+    <record id="maintenance_equipment_category_form" model="ir.ui.view">
+        <field name="name">maintenance.equipment.category.form</field>
+        <field name="model">maintenance.equipment.category</field>
+        <field name="arch" type="xml">
+            <form string="Equipment Category">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_equipment"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-cogs">
+                            <field name="equipment_count" widget="statinfo" string="Equipment"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger"
+                            invisible="active"/>
+                    <group>
+                        <field name="name" placeholder="e.g., Machinery"/>
+                        <field name="color" widget="color_picker"/>
+                    </group>
+                    <group>
+                        <field name="note" placeholder="Optional description..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    ```
+    -->
+    <record id="maintenance_equipment_category_form" model="ir.ui.view">
+        <field name="name">maintenance.equipment.category.form</field>
+        <field name="model">maintenance.equipment.category</field>
+        <field name="arch" type="xml">
+            <form string="Equipment Category">
+                <sheet>
+                    <!-- TODO: Add smart button for equipment count -->
+                    <group>
+                        <field name="name" placeholder="e.g., Machinery"/>
+                        <field name="color" widget="color_picker"/>
+                    </group>
+                    <group>
+                        <field name="note" placeholder="Optional description..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ===================================================================== -->
+    <!-- TREE VIEW                                                             -->
+    <!-- ===================================================================== -->
+    <!--
+    INSTRUCTIONS:
+    - Show name and equipment count
+    - Sortable columns
+    - Optional: color indicator
+
+    EXAMPLE:
+    ```xml
+    <record id="maintenance_equipment_category_tree" model="ir.ui.view">
+        <field name="name">maintenance.equipment.category.tree</field>
+        <field name="model">maintenance.equipment.category</field>
+        <field name="arch" type="xml">
+            <tree string="Equipment Categories">
+                <field name="name"/>
+                <field name="equipment_count"/>
+                <field name="color" widget="color_picker" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+    ```
+    -->
+    <record id="maintenance_equipment_category_tree" model="ir.ui.view">
+        <field name="name">maintenance.equipment.category.tree</field>
+        <field name="model">maintenance.equipment.category</field>
+        <field name="arch" type="xml">
+            <tree string="Equipment Categories">
+                <field name="name"/>
+                <field name="equipment_count"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ===================================================================== -->
+    <!-- SEARCH VIEW                                                           -->
+    <!-- ===================================================================== -->
+    <record id="maintenance_equipment_category_search" model="ir.ui.view">
+        <field name="name">maintenance.equipment.category.search</field>
+        <field name="model">maintenance.equipment.category</field>
+        <field name="arch" type="xml">
+            <search string="Search Categories">
+                <field name="name"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ===================================================================== -->
+    <!-- ACTION                                                                -->
+    <!-- ===================================================================== -->
+    <record id="maintenance_equipment_category_action" model="ir.actions.act_window">
+        <field name="name">Equipment Categories</field>
+        <field name="res_model">maintenance.equipment.category</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first equipment category
+            </p>
+            <p>
+                Categories help organize equipment by type (e.g., Machinery, Vehicles, IT Equipment).
+            </p>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+    ============================================================================
+    SCHEDULED ACTIONS (Cron Jobs)
+    ============================================================================
+
+    File: data/scheduled_actions.xml
+
+    SCHEDULED ACTIONS TO IMPLEMENT:
+    1. Daily: Send overdue request reminders
+    2. Daily: Check for warranty expirations and send alerts
+    3. Weekly: Generate maintenance statistics (optional)
+
+    IMPLEMENTATION NOTES:
+    - Use interval_type and interval_number for frequency
+    - code field contains Python code to execute
+    - Can call model methods defined in Python files
+    - Set active=True to enable in production
+    ============================================================================
+    -->
+
+    <!-- ===================================================================== -->
+    <!-- OVERDUE REQUESTS REMINDER                                             -->
+    <!-- ===================================================================== -->
+    <!--
+    Runs daily to find overdue requests and send reminder emails.
+
+    IMPLEMENTATION:
+    1. Search for requests where is_overdue = True
+    2. Group by technician
+    3. Send email using mail_template_request_overdue template
+    -->
+    <record id="ir_cron_overdue_reminders" model="ir.cron">
+        <field name="name">Maintenance: Send Overdue Reminders</field>
+        <field name="model_id" ref="model_maintenance_request"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_send_overdue_reminders()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="active" eval="False"/>  <!-- Set True in production -->
+        <field name="doall" eval="False"/>
+    </record>
+
+    <!-- ===================================================================== -->
+    <!-- WARRANTY EXPIRATION ALERTS                                            -->
+    <!-- ===================================================================== -->
+    <!--
+    Runs daily to check for equipment with expiring warranties.
+
+    ALERT THRESHOLDS:
+    - 30 days: First warning
+    - 7 days: Urgent warning
+    - 1 day: Final warning
+
+    IMPLEMENTATION:
+    Call method on maintenance.equipment model to:
+    1. Search for equipment where warranty_date <= today + 30 days
+    2. Filter to those not already alerted recently
+    3. Send email using mail_template_warranty_alert template
+    -->
+    <record id="ir_cron_warranty_alerts" model="ir.cron">
+        <field name="name">Maintenance: Warranty Expiration Alerts</field>
+        <field name="model_id" ref="model_maintenance_equipment"/>
+        <field name="state">code</field>
+        <field name="code">
+# TODO: Implement this method in maintenance.equipment model
+# model._cron_send_warranty_alerts()
+
+# Placeholder implementation:
+from datetime import timedelta
+today = fields.Date.today()
+alert_threshold = today + timedelta(days=30)
+
+equipment_to_alert = model.search([
+    ('warranty_date', '&lt;=', alert_threshold),
+    ('warranty_date', '&gt;', today),
+    ('active', '=', True),
+])
+
+# TODO: Send emails and log alerts
+# for eq in equipment_to_alert:
+#     template = env.ref('gearguard.mail_template_warranty_alert')
+#     template.send_mail(eq.id, force_send=True)
+        </field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="active" eval="False"/>  <!-- Set True in production -->
+        <field name="doall" eval="False"/>
+    </record>
+
+    <!-- ===================================================================== -->
+    <!-- SCHEDULED MAINTENANCE REMINDER (Optional)                             -->
+    <!-- ===================================================================== -->
+    <!--
+    Runs daily to remind technicians of upcoming scheduled maintenance.
+    Sends reminders for maintenance scheduled for tomorrow.
+    -->
+    <record id="ir_cron_scheduled_maintenance_reminder" model="ir.cron">
+        <field name="name">Maintenance: Upcoming Maintenance Reminder</field>
+        <field name="model_id" ref="model_maintenance_request"/>
+        <field name="state">code</field>
+        <field name="code">
+# TODO: Implement reminder for tomorrow's scheduled maintenance
+from datetime import timedelta
+
+tomorrow = fields.Date.today() + timedelta(days=1)
+
+upcoming = model.search([
+    ('schedule_date', '=', tomorrow),
+    ('stage', 'in', ['new', 'in_progress']),
+    ('maintenance_type', '=', 'preventive'),
+])
+
+# TODO: Send reminder emails
+# for request in upcoming:
+#     # Send notification
+#     pass
+        </field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="active" eval="False"/>
+        <field name="doall" eval="False"/>
+    </record>
+
+</odoo>

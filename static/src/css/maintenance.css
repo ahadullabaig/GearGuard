@@ -1,0 +1,271 @@
+/**
+ * ============================================================================
+ * GEARGUARD MAINTENANCE MODULE - CUSTOM STYLES
+ * ============================================================================
+ *
+ * File: static/src/css/maintenance.css
+ *
+ * This file contains custom CSS styles for the GearGuard maintenance module.
+ * Styles are loaded via the web.assets_backend bundle in __manifest__.py.
+ *
+ * KEY STYLING AREAS:
+ * 1. Kanban Card Overdue Indicators
+ * 2. Priority Ribbons
+ * 3. Warranty Alert Badges
+ * 4. Stage/Status Colors
+ *
+ * IMPORTANT: These styles enhance the visual feedback in the Kanban view,
+ * which is the primary interface for judges during the demo.
+ * ============================================================================
+ */
+
+/* =========================================================================== */
+/* KANBAN CARD - OVERDUE STYLING                                               */
+/* =========================================================================== */
+/*
+ * Overdue requests should have red visual indicators:
+ * - Red left border
+ * - Red text for title
+ * - Optional: light red background
+ *
+ * NOTE: The Kanban template adds 'border-danger' class via t-attf-class
+ * when is_overdue is True. These styles enhance that.
+ */
+
+/* Overdue card - Enhanced border */
+.o_maintenance_request_kanban .oe_kanban_card.border-danger,
+.o_kanban_view .oe_kanban_card.border-danger {
+    border-left: 4px solid #dc3545 !important;
+    background-color: rgba(220, 53, 69, 0.05);
+}
+
+/* Overdue text styling (applied via class in template) */
+.o_kanban_record_title .text-danger {
+    font-weight: 600;
+}
+
+/* Overdue badge styling */
+.oe_kanban_card .badge.bg-danger {
+    font-size: 0.75em;
+    font-weight: 600;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+
+/* =========================================================================== */
+/* PRIORITY RIBBONS                                                            */
+/* =========================================================================== */
+/*
+ * Priority indicators on Kanban cards:
+ * - 0 (Low): Gray
+ * - 1 (Normal): Blue
+ * - 2 (High): Orange/Yellow
+ * - 3 (Urgent): Red
+ *
+ * Can be implemented as colored strips or corner ribbons
+ */
+
+/* Priority indicator strip (top of card) */
+.oe_kanban_card[data-priority="3"]::before,
+.oe_kanban_card.priority-urgent::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background-color: #dc3545;
+}
+
+.oe_kanban_card[data-priority="2"]::before,
+.oe_kanban_card.priority-high::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background-color: #ffc107;
+}
+
+/* Priority widget stars - enhance visibility */
+.o_priority .fa-star {
+    color: #ffc107;
+}
+
+.o_priority .fa-star-o {
+    color: #ccc;
+}
+
+
+/* =========================================================================== */
+/* WARRANTY ALERT BADGES                                                       */
+/* =========================================================================== */
+/*
+ * Warning indicators for equipment with expiring warranties
+ */
+
+/* Warranty alert icon */
+.oe_kanban_card .badge.bg-warning i.fa-exclamation-triangle {
+    margin-right: 2px;
+}
+
+/* Warranty status colors in tree view */
+.o_list_view tr.text-warning td {
+    background-color: rgba(255, 193, 7, 0.1);
+}
+
+.o_list_view tr.text-danger td {
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+
+/* =========================================================================== */
+/* STAGE/STATUS BADGES                                                         */
+/* =========================================================================== */
+/*
+ * Consistent colors for stage and status badges
+ */
+
+/* Stage badge colors */
+.badge[data-stage="new"],
+.o_field_badge.text-bg-info {
+    background-color: #17a2b8 !important;
+}
+
+.badge[data-stage="in_progress"],
+.o_field_badge.text-bg-warning {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+}
+
+.badge[data-stage="repaired"],
+.o_field_badge.text-bg-success {
+    background-color: #28a745 !important;
+}
+
+.badge[data-stage="scrap"],
+.o_field_badge.text-bg-danger {
+    background-color: #dc3545 !important;
+}
+
+/* Maintenance type badges */
+.badge[data-type="corrective"] {
+    background-color: #6c757d !important;
+}
+
+.badge[data-type="preventive"] {
+    background-color: #20c997 !important;
+}
+
+
+/* =========================================================================== */
+/* FORM VIEW ENHANCEMENTS                                                      */
+/* =========================================================================== */
+
+/* Alert banners */
+.o_form_view .alert-danger {
+    border-left: 4px solid #dc3545;
+}
+
+.o_form_view .alert-warning {
+    border-left: 4px solid #ffc107;
+}
+
+/* Cost total field emphasis */
+.o_form_view .oe_subtotal_footer_separator {
+    font-size: 1.2em;
+    font-weight: bold;
+    border-top: 2px solid #000;
+    padding-top: 8px;
+}
+
+
+/* =========================================================================== */
+/* CALENDAR VIEW                                                               */
+/* =========================================================================== */
+
+/* Preventive maintenance events - green tint */
+.fc-event.o_calendar_event[data-type="preventive"] {
+    background-color: #20c997;
+    border-color: #1aa179;
+}
+
+/* Corrective maintenance events - gray tint */
+.fc-event.o_calendar_event[data-type="corrective"] {
+    background-color: #6c757d;
+    border-color: #545b62;
+}
+
+
+/* =========================================================================== */
+/* SMART BUTTON STYLING                                                        */
+/* =========================================================================== */
+
+/* Highlight smart button when there are open requests */
+.o_form_view .oe_button_box .oe_stat_button.o_button_has_items {
+    background-color: rgba(135, 90, 123, 0.1);
+}
+
+/* Smart button badge */
+.oe_stat_button .o_stat_value {
+    font-weight: bold;
+}
+
+
+/* =========================================================================== */
+/* TEAM COLOR CONSISTENCY                                                      */
+/* =========================================================================== */
+/*
+ * Odoo uses color indices 0-11 for Kanban colors.
+ * These can be customized here if needed.
+ */
+
+/* Team card colors (optional customization) */
+.o_kanban_record.o_kanban_color_1 { background-color: #F06050 !important; }
+.o_kanban_record.o_kanban_color_2 { background-color: #F4A460 !important; }
+.o_kanban_record.o_kanban_color_3 { background-color: #F7CD1F !important; }
+.o_kanban_record.o_kanban_color_4 { background-color: #6CC1ED !important; }
+.o_kanban_record.o_kanban_color_5 { background-color: #814968 !important; }
+
+
+/* =========================================================================== */
+/* RESPONSIVE ADJUSTMENTS                                                      */
+/* =========================================================================== */
+
+@media (max-width: 768px) {
+    /* Smaller badges on mobile */
+    .oe_kanban_card .badge {
+        font-size: 0.65em;
+    }
+
+    /* Compact card layout */
+    .oe_kanban_card .o_kanban_record_bottom {
+        flex-direction: column;
+    }
+}
+
+
+/* =========================================================================== */
+/* PRINT STYLES (Optional)                                                     */
+/* =========================================================================== */
+
+@media print {
+    /* Hide interactive elements when printing */
+    .oe_button_box,
+    .o_kanban_quick_create {
+        display: none !important;
+    }
+
+    /* Ensure colors print */
+    .badge {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}

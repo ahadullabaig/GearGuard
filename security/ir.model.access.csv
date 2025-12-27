@@ -1,0 +1,61 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+# ==============================================================================
+# ACCESS RIGHTS (ir.model.access)
+# ==============================================================================
+#
+# This file defines basic CRUD permissions for each model and group.
+# Record rules (in maintenance_security.xml) further restrict access.
+#
+# FORMAT:
+# id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+#
+# - id: Unique XML ID for this access rule
+# - name: Descriptive name
+# - model_id:id: Reference to the model (model_<model_name_with_underscores>)
+# - group_id:id: Reference to the security group (leave empty for public)
+# - perm_*: 1 for allow, 0 for deny
+#
+# GROUPS:
+# - gearguard.group_maintenance_user: Basic user
+# - gearguard.group_maintenance_technician: Technician
+# - gearguard.group_maintenance_manager: Manager
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Equipment Category
+# ------------------------------------------------------------------------------
+access_maintenance_equipment_category_user,maintenance.equipment.category.user,model_maintenance_equipment_category,gearguard.group_maintenance_user,1,0,0,0
+access_maintenance_equipment_category_manager,maintenance.equipment.category.manager,model_maintenance_equipment_category,gearguard.group_maintenance_manager,1,1,1,1
+
+# ------------------------------------------------------------------------------
+# Maintenance Team
+# ------------------------------------------------------------------------------
+access_maintenance_team_user,maintenance.team.user,model_maintenance_team,gearguard.group_maintenance_user,1,0,0,0
+access_maintenance_team_manager,maintenance.team.manager,model_maintenance_team,gearguard.group_maintenance_manager,1,1,1,1
+
+# ------------------------------------------------------------------------------
+# Maintenance Equipment
+# ------------------------------------------------------------------------------
+access_maintenance_equipment_user,maintenance.equipment.user,model_maintenance_equipment,gearguard.group_maintenance_user,1,0,0,0
+access_maintenance_equipment_technician,maintenance.equipment.technician,model_maintenance_equipment,gearguard.group_maintenance_technician,1,1,0,0
+access_maintenance_equipment_manager,maintenance.equipment.manager,model_maintenance_equipment,gearguard.group_maintenance_manager,1,1,1,1
+
+# ------------------------------------------------------------------------------
+# Maintenance Request
+# ------------------------------------------------------------------------------
+access_maintenance_request_user,maintenance.request.user,model_maintenance_request,gearguard.group_maintenance_user,1,0,1,0
+access_maintenance_request_technician,maintenance.request.technician,model_maintenance_request,gearguard.group_maintenance_technician,1,1,1,0
+access_maintenance_request_manager,maintenance.request.manager,model_maintenance_request,gearguard.group_maintenance_manager,1,1,1,1
+
+# ------------------------------------------------------------------------------
+# Wizard (Transient Models)
+# ------------------------------------------------------------------------------
+# TODO: Add wizard access when implemented
+# access_warranty_alert_wizard_manager,maintenance.warranty.alert.wizard.manager,model_maintenance_warranty_alert_wizard,gearguard.group_maintenance_manager,1,1,1,1
+
+# ------------------------------------------------------------------------------
+# Report (Analysis Models)
+# ------------------------------------------------------------------------------
+# TODO: Add report access when implemented
+# access_maintenance_report_user,maintenance.report.user,model_maintenance_report,gearguard.group_maintenance_user,1,0,0,0
+# access_maintenance_report_manager,maintenance.report.manager,model_maintenance_report,gearguard.group_maintenance_manager,1,1,1,1

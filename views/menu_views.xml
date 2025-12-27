@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+    ============================================================================
+    MENU STRUCTURE
+    ============================================================================
+
+    File: views/menu_views.xml
+
+    MENU HIERARCHY:
+    ===============
+    Maintenance (root app menu)
+    ├── Maintenance Requests
+    │   ├── All Requests (kanban default)
+    │   ├── My Requests
+    │   └── Calendar
+    ├── Equipment
+    │   ├── Equipment
+    │   └── Categories
+    ├── Reporting (optional)
+    │   └── Analysis
+    └── Configuration
+        └── Teams
+
+    IMPLEMENTATION NOTES:
+    - Root menu has web_icon for app launcher
+    - Use sequence numbers to control order
+    - Action references must match action IDs in view files
+    ============================================================================
+    -->
+
+    <!-- ===================================================================== -->
+    <!-- ROOT MENU (App Launcher)                                              -->
+    <!-- ===================================================================== -->
+    <menuitem id="maintenance_menu_root"
+              name="Maintenance"
+              sequence="50"
+              web_icon="gearguard,static/description/icon.png"/>
+
+    <!-- ===================================================================== -->
+    <!-- MAINTENANCE REQUESTS MENU                                             -->
+    <!-- ===================================================================== -->
+    <menuitem id="maintenance_menu_requests"
+              name="Maintenance Requests"
+              parent="maintenance_menu_root"
+              sequence="10"/>
+
+    <menuitem id="maintenance_menu_requests_all"
+              name="All Requests"
+              parent="maintenance_menu_requests"
+              action="maintenance_request_action"
+              sequence="10"/>
+
+    <menuitem id="maintenance_menu_requests_my"
+              name="My Requests"
+              parent="maintenance_menu_requests"
+              action="maintenance_request_action_my"
+              sequence="20"/>
+
+    <menuitem id="maintenance_menu_requests_calendar"
+              name="Calendar"
+              parent="maintenance_menu_requests"
+              action="maintenance_request_action_calendar"
+              sequence="30"/>
+
+    <!-- ===================================================================== -->
+    <!-- EQUIPMENT MENU                                                        -->
+    <!-- ===================================================================== -->
+    <menuitem id="maintenance_menu_equipment"
+              name="Equipment"
+              parent="maintenance_menu_root"
+              sequence="20"/>
+
+    <menuitem id="maintenance_menu_equipment_list"
+              name="Equipment"
+              parent="maintenance_menu_equipment"
+              action="maintenance_equipment_action"
+              sequence="10"/>
+
+    <menuitem id="maintenance_menu_equipment_categories"
+              name="Categories"
+              parent="maintenance_menu_equipment"
+              action="maintenance_equipment_category_action"
+              sequence="20"/>
+
+    <!-- ===================================================================== -->
+    <!-- REPORTING MENU (Optional)                                             -->
+    <!-- ===================================================================== -->
+    <!--
+    TODO: Add reporting menu when pivot/graph views are fully implemented
+
+    <menuitem id="maintenance_menu_reporting"
+              name="Reporting"
+              parent="maintenance_menu_root"
+              sequence="30"/>
+
+    <menuitem id="maintenance_menu_reporting_analysis"
+              name="Maintenance Analysis"
+              parent="maintenance_menu_reporting"
+              action="maintenance_request_action_report"
+              sequence="10"/>
+    -->
+
+    <!-- ===================================================================== -->
+    <!-- CONFIGURATION MENU                                                    -->
+    <!-- ===================================================================== -->
+    <menuitem id="maintenance_menu_configuration"
+              name="Configuration"
+              parent="maintenance_menu_root"
+              sequence="100"
+              groups="base.group_system"/>
+
+    <menuitem id="maintenance_menu_configuration_teams"
+              name="Teams"
+              parent="maintenance_menu_configuration"
+              action="maintenance_team_action"
+              sequence="10"/>
+
+    <!--
+    TODO: Add settings menu item if needed
+    <menuitem id="maintenance_menu_configuration_settings"
+              name="Settings"
+              parent="maintenance_menu_configuration"
+              action="maintenance_settings_action"
+              sequence="100"/>
+    -->
+
+</odoo>

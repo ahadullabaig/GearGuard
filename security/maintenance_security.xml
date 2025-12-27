@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+    ============================================================================
+    SECURITY CONFIGURATION
+    ============================================================================
+
+    File: security/maintenance_security.xml
+
+    SECURITY GROUPS:
+    ================
+    1. maintenance.group_user - Basic User
+       - Can create maintenance requests
+       - Can view all equipment
+       - Can view all requests
+
+    2. maintenance.group_technician - Technician
+       - Inherits from group_user
+       - Can manage requests assigned to them
+       - Can update equipment status
+
+    3. maintenance.group_manager - Manager
+       - Inherits from group_technician
+       - Full access to all records
+       - Can manage teams and configuration
+
+    RECORD RULES:
+    =============
+    - Equipment: All users can read, managers can write
+    - Requests: Users see all, technicians can modify assigned
+    - Teams: Read all, managers can write
+
+    IMPLEMENTATION NOTES:
+    - Groups should be in category for organization
+    - Use implied_ids for inheritance
+    - Record rules use domain expressions
+    ============================================================================
+    -->
+
+    <!-- ===================================================================== -->
+    <!-- MODULE CATEGORY                                                       -->
+    <!-- ===================================================================== -->
+    <record id="module_category_maintenance" model="ir.module.category">
+        <field name="name">Maintenance</field>
+        <field name="description">Module for maintenance management</field>
+        <field name="sequence">50</field>
+    </record>
+
+    <!-- ===================================================================== -->
+    <!-- SECURITY GROUPS                                                       -->
+    <!-- ===================================================================== -->
+
+    <!-- Basic User Group -->
+    <record id="group_maintenance_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="comment">Basic maintenance user - can create requests and view equipment</field>
+        <field name="category_id" ref="module_category_maintenance"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!-- Technician Group -->
+    <record id="group_maintenance_technician" model="res.groups">
+        <field name="name">Technician</field>
+        <field name="comment">Maintenance technician - can manage assigned requests</field>
+        <field name="category_id" ref="module_category_maintenance"/>
+        <field name="implied_ids" eval="[(4, ref('group_maintenance_user'))]"/>
+    </record>
+
+    <!-- Manager Group -->
+    <record id="group_maintenance_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="comment">Maintenance manager - full access to all maintenance features</field>
+        <field name="category_id" ref="module_category_maintenance"/>
+        <field name="implied_ids" eval="[(4, ref('group_maintenance_technician'))]"/>
+    </record>
+
+    <!-- ===================================================================== -->
+    <!-- RECORD RULES                                                          -->
+    <!-- ===================================================================== -->
+    <!--
+    RECORD RULE STRUCTURE:
+    - name: Descriptive name
+    - model_id: Model to apply rule to
+    - domain_force: Domain expression (Python list)
+    - groups: Groups this rule applies to
+    - perm_read/write/create/unlink: Permissions
+
+    DOMAIN EXAMPLES:
+    - [(1, '=', 1)] - Allow all (always true)
+    - [('user_id', '=', user.id)] - Only own records
+    - [('team_id.member_ids', 'in', user.id)] - Team membership
+    -->
+
+    <!-- Equipment Rules -->
+    <record id="rule_equipment_user_read" model="ir.rule">
+        <field name="name">Equipment: User Read All</field>
+        <field name="model_id" ref="model_maintenance_equipment"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_maintenance_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_equipment_manager_full" model="ir.rule">
+        <field name="name">Equipment: Manager Full Access</field>
+        <field name="model_id" ref="model_maintenance_equipment"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_maintenance_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- Request Rules -->
+    <record id="rule_request_user_read" model="ir.rule">
+        <field name="name">Request: User Read All</field>
+        <field name="model_id" ref="model_maintenance_request"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_maintenance_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_request_technician" model="ir.rule">
+        <field name="name">Request: Technician Manage Assigned</field>
+        <field name="model_id" ref="model_maintenance_request"/>
+        <field name="domain_force">['|', ('technician_id', '=', user.id), ('technician_id', '=', False)]</field>
+        <field name="groups" eval="[(4, ref('group_maintenance_technician'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_request_manager_full" model="ir.rule">
+        <field name="name">Request: Manager Full Access</field>
+        <field name="model_id" ref="model_maintenance_request"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_maintenance_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- Team Rules -->
+    <record id="rule_team_user_read" model="ir.rule">
+        <field name="name">Team: User Read All</field>
+        <field name="model_id" ref="model_maintenance_team"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_maintenance_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_team_manager_full" model="ir.rule">
+        <field name="name">Team: Manager Full Access</field>
+        <field name="model_id" ref="model_maintenance_team"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_maintenance_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- Category Rules -->
+    <record id="rule_category_user_read" model="ir.rule">
+        <field name="name">Category: User Read All</field>
+        <field name="model_id" ref="model_maintenance_equipment_category"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_maintenance_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <record id="rule_category_manager_full" model="ir.rule">
+        <field name="name">Category: Manager Full Access</field>
+        <field name="model_id" ref="model_maintenance_equipment_category"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_maintenance_manager'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+</odoo>

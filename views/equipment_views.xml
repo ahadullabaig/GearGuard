@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+    ============================================================================
+    MAINTENANCE EQUIPMENT VIEWS
+    ============================================================================
+
+    File: views/equipment_views.xml
+    Model: maintenance.equipment
+    Priority: HIGH (Core model)
+
+    VIEWS TO IMPLEMENT:
+    1. Form View - Full details with SMART BUTTON (critical!)
+    2. Tree View - List with warranty alert indicator
+    3. Kanban View - Cards with image, state, warranty alert
+    4. Search View - Filters by category, team, state, warranty
+
+    ==========================================================================
+    CRITICAL FEATURE: SMART BUTTON
+    ==========================================================================
+    The Equipment form MUST have a "Maintenance" smart button that:
+    - Shows badge with open_request_count
+    - When clicked, opens filtered list of requests for this equipment
+    - Icon: fa-wrench or fa-tools
+
+    This is a KEY DEMO FEATURE that judges look for!
+    ==========================================================================
+
+    WARRANTY ALERT DISPLAY:
+    - Form: Show warning banner if warranty_alert = True
+    - Kanban: Show warning icon on card
+    - Tree: Show colored indicator or icon in column
+    ============================================================================
+    -->
+
+    <!-- ===================================================================== -->
+    <!-- FORM VIEW                                                             -->
+    <!-- ===================================================================== -->
+    <!--
+    INSTRUCTIONS:
+    - Header: Smart button box with "Maintenance" button
+    - Title: Equipment name with state ribbon
+    - Image on the left side
+    - Tabs: General Info, Ownership, Maintenance History, Statistics
+
+    SMART BUTTON IMPLEMENTATION:
+    ```xml
+    <div class="oe_button_box" name="button_box">
+        <button name="action_view_requests"
+                type="object"
+                class="oe_stat_button"
+                icon="fa-wrench">
+            <field name="open_request_count" widget="statinfo" string="Maintenance"/>
+        </button>
+    </div>
+    ```
+
+    WARRANTY ALERT BANNER:
+    ```xml
+    <div class="alert alert-warning" role="alert"
+         invisible="not warranty_alert">
+        <strong>Warning!</strong> Warranty expires in
+        <field name="days_to_warranty_end"/> days
+        (on <field name="warranty_date"/>)
+    </div>
+    ```
+
+    STATE RIBBON:
+    ```xml
+    <widget name="web_ribbon" title="Scrapped" bg_color="bg-danger"
+            invisible="state != 'scrapped'"/>
+    <widget name="web_ribbon" title="Under Maintenance" bg_color="bg-warning"
+            invisible="state != 'maintenance'"/>
+    ```
+    -->
+    <record id="maintenance_equipment_form" model="ir.ui.view">
+        <field name="name">maintenance.equipment.form</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="arch" type="xml">
+            <form string="Equipment">
+                <header>
+                    <!-- TODO: Add state buttons if needed -->
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="operational,maintenance,scrapped"/>
+                </header>
+                <sheet>
+                    <!-- SMART BUTTON BOX - CRITICAL! -->
+                    <div class="oe_button_box" name="button_box">
+                        <!-- TODO: Implement smart button
+                        <button name="action_view_requests"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-wrench">
+                            <field name="open_request_count" widget="statinfo" string="Maintenance"/>
+                        </button>
+                        -->
+                    </div>
+
+                    <!-- STATE RIBBONS -->
+                    <!-- TODO: Add ribbons for scrapped/maintenance states -->
+
+                    <!-- EQUIPMENT IMAGE -->
+                    <field name="image" widget="image" class="oe_avatar"
+                           options="{'preview_image': 'image'}"/>
+
+                    <!-- TITLE -->
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Equipment Name..."/>
+                        </h1>
+                        <field name="serial_number" placeholder="Serial Number..."/>
+                    </div>
+
+                    <!-- WARRANTY ALERT BANNER -->
+                    <!-- TODO: Add warning banner when warranty_alert is True
+                    <div class="alert alert-warning" role="alert"
+                         invisible="not warranty_alert">
+                        <strong>Warning!</strong> Warranty expires in
+                        <field name="days_to_warranty_end"/> days
+                    </div>
+                    -->
+
+                    <group>
+                        <group string="Classification">
+                            <field name="category_id"/>
+                            <field name="maintenance_team_id"/>
+                            <field name="technician_id"
+                                   domain="[('id', 'in', team_member_ids)]"/>
+                            <field name="team_member_ids" invisible="1"/>
+                            <field name="location"/>
+                        </group>
+                        <group string="Ownership">
+                            <field name="owner_type" widget="radio"/>
+                            <field name="department_id"
+                                   invisible="owner_type != 'department'"/>
+                            <field name="employee_id"
+                                   invisible="owner_type != 'employee'"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Details" name="details">
+                            <group>
+                                <group string="Dates">
+                                    <field name="purchase_date"/>
+                                    <field name="warranty_date"/>
+                                    <field name="warranty_state" invisible="1"/>
+                                </group>
+                                <group string="Status">
+                                    <field name="active"/>
+                                </group>
+                            </group>
+                            <field name="notes" placeholder="Additional notes..."/>
+                        </page>
+
+                        <page string="Maintenance Statistics" name="statistics">
+                            <!--
+                            TODO: Add maintenance statistics display
+                            - Total maintenance cost
+                            - Total downtime
+                            - Last maintenance date
+                            - MTBF
+                            - Embedded list of maintenance history
+                            -->
+                            <group>
+                                <group string="Cost Summary">
+                                    <field name="total_maintenance_cost"/>
+                                </group>
+                                <group string="Time Statistics">
+                                    <field name="total_downtime"/>
+                                    <field name="last_maintenance_date"/>
+                                    <field name="mtbf" string="Avg. Time Between Failures (days)"/>
+                                </group>
+                            </group>
+                            <!--
+                            TODO: Add maintenance history list
+                            <field name="request_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="maintenance_type"/>
+                                    <field name="stage"/>
+                                    <field name="close_date"/>
+                                    <field name="cost_total"/>
+                                </tree>
+                            </field>
+                            -->
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- ===================================================================== -->
+    <!-- TREE VIEW                                                             -->
+    <!-- ===================================================================== -->
+    <!--
+    INSTRUCTIONS:
+    - Show key columns: name, serial, category, team, state
+    - Warranty alert indicator (colored icon or badge)
+    - Row decoration for scrapped equipment
+
+    WARRANTY INDICATOR:
+    ```xml
+    <field name="warranty_alert" widget="boolean_favorite"
+           nolabel="1" invisible="warranty_state == 'none'"/>
+    ```
+    or use decoration:
+    ```xml
+    <tree decoration-danger="warranty_state == 'expired'"
+          decoration-warning="warranty_state == 'expiring'">
+    ```
+    -->
+    <record id="maintenance_equipment_tree" model="ir.ui.view">
+        <field name="name">maintenance.equipment.tree</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="arch" type="xml">
+            <tree string="Equipment"
+                  decoration-muted="state == 'scrapped'"
+                  decoration-warning="warranty_state == 'expiring'"
+                  decoration-danger="warranty_state == 'expired'">
+                <field name="name"/>
+                <field name="serial_number" optional="show"/>
+                <field name="category_id"/>
+                <field name="maintenance_team_id"/>
+                <field name="technician_id" optional="hide"/>
+                <field name="location" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'operational'"
+                       decoration-warning="state == 'maintenance'"
+                       decoration-danger="state == 'scrapped'"/>
+                <field name="warranty_date" optional="show"/>
+                <field name="warranty_state" invisible="1"/>
+                <field name="open_request_count" string="Open Requests" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ===================================================================== -->
+    <!-- KANBAN VIEW                                                           -->
+    <!-- ===================================================================== -->
+    <!--
+    INSTRUCTIONS:
+    - Cards with equipment image
+    - State badge
+    - Warranty alert icon if expiring
+    - Category and team tags
+    - Click to open form
+
+    EXAMPLE STRUCTURE:
+    ```xml
+    <kanban class="o_kanban_mobile">
+        <field name="name"/>
+        <field name="image"/>
+        <field name="state"/>
+        <field name="warranty_alert"/>
+        <templates>
+            <t t-name="kanban-box">
+                <div class="oe_kanban_global_click">
+                    <div class="o_kanban_image">
+                        <img t-att-src="kanban_image('maintenance.equipment', 'image', record.id.raw_value)"
+                             alt="Equipment"/>
+                    </div>
+                    <div class="oe_kanban_details">
+                        <strong><field name="name"/></strong>
+                        <div t-if="record.warranty_alert.raw_value">
+                            <span class="badge bg-warning">Warranty Alert</span>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </templates>
+    </kanban>
+    ```
+    -->
+    <record id="maintenance_equipment_kanban" model="ir.ui.view">
+        <field name="name">maintenance.equipment.kanban</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile">
+                <field name="name"/>
+                <field name="state"/>
+                <field name="category_id"/>
+                <field name="maintenance_team_id"/>
+                <field name="warranty_alert"/>
+                <field name="warranty_state"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click oe_kanban_card">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title">
+                                        <field name="name"/>
+                                    </strong>
+                                    <span class="o_kanban_record_subtitle">
+                                        <field name="category_id"/>
+                                    </span>
+                                </div>
+                                <!-- WARRANTY ALERT ICON -->
+                                <t t-if="record.warranty_alert.raw_value">
+                                    <span class="badge bg-warning" title="Warranty Expiring">
+                                        <i class="fa fa-exclamation-triangle"/>
+                                    </span>
+                                </t>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <field name="maintenance_team_id"/>
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left">
+                                    <field name="state" widget="badge"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ===================================================================== -->
+    <!-- SEARCH VIEW                                                           -->
+    <!-- ===================================================================== -->
+    <record id="maintenance_equipment_search" model="ir.ui.view">
+        <field name="name">maintenance.equipment.search</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="arch" type="xml">
+            <search string="Search Equipment">
+                <field name="name" string="Equipment"
+                       filter_domain="['|', ('name', 'ilike', self), ('serial_number', 'ilike', self)]"/>
+                <field name="category_id"/>
+                <field name="maintenance_team_id"/>
+                <field name="technician_id"/>
+                <field name="location"/>
+                <separator/>
+                <filter name="operational" string="Operational"
+                        domain="[('state', '=', 'operational')]"/>
+                <filter name="maintenance" string="Under Maintenance"
+                        domain="[('state', '=', 'maintenance')]"/>
+                <filter name="scrapped" string="Scrapped"
+                        domain="[('state', '=', 'scrapped')]"/>
+                <separator/>
+                <filter name="warranty_alert" string="Warranty Expiring"
+                        domain="[('warranty_alert', '=', True)]"/>
+                <filter name="warranty_expired" string="Warranty Expired"
+                        domain="[('warranty_state', '=', 'expired')]"/>
+                <separator/>
+                <filter name="archived" string="Archived"
+                        domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_category" string="Category"
+                            context="{'group_by': 'category_id'}"/>
+                    <filter name="group_team" string="Team"
+                            context="{'group_by': 'maintenance_team_id'}"/>
+                    <filter name="group_state" string="State"
+                            context="{'group_by': 'state'}"/>
+                    <filter name="group_department" string="Department"
+                            context="{'group_by': 'department_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ===================================================================== -->
+    <!-- ACTION                                                                -->
+    <!-- ===================================================================== -->
+    <record id="maintenance_equipment_action" model="ir.actions.act_window">
+        <field name="name">Equipment</field>
+        <field name="res_model">maintenance.equipment</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="search_view_id" ref="maintenance_equipment_search"/>
+        <field name="context">{'search_default_operational': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Add your first piece of equipment
+            </p>
+            <p>
+                Track your company assets, assign maintenance teams,
+                and monitor warranty expirations.
+            </p>
+        </field>
+    </record>
+
+</odoo>

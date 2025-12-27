@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+    ============================================================================
+    EMAIL TEMPLATES
+    ============================================================================
+
+    File: data/mail_templates.xml
+
+    TEMPLATES TO IMPLEMENT:
+    1. Request Assignment Notification
+    2. Overdue Request Reminder
+    3. Warranty Expiration Alert
+    4. Request Completion Notification
+
+    IMPLEMENTATION NOTES:
+    - Use Jinja2/Qweb syntax for dynamic content
+    - Reference record fields with ${object.field_name}
+    - Include links to records where appropriate
+    - Style emails appropriately for business use
+    ============================================================================
+    -->
+
+    <!-- ===================================================================== -->
+    <!-- REQUEST ASSIGNMENT NOTIFICATION                                       -->
+    <!-- ===================================================================== -->
+    <!--
+    Sent when a technician is assigned to a request.
+
+    VARIABLES:
+    - object: maintenance.request record
+    - object.name: Request subject
+    - object.equipment_id: Equipment
+    - object.technician_id: Assigned technician
+    -->
+    <record id="mail_template_request_assigned" model="mail.template">
+        <field name="name">Maintenance Request: Assignment Notification</field>
+        <field name="model_id" ref="model_maintenance_request"/>
+        <field name="subject">Maintenance Request Assigned: {{ object.name }}</field>
+        <field name="email_from">{{ (object.company_id.email or user.email) }}</field>
+        <field name="email_to">{{ object.technician_id.email }}</field>
+        <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px; font-size: 14px;">
+    <p style="margin: 0px; padding: 0px;">
+        Hello {{ object.technician_id.name }},
+    </p>
+    <p style="margin: 16px 0px;">
+        You have been assigned to a maintenance request:
+    </p>
+    <table style="border-collapse: collapse; width: 100%;">
+        <tr>
+            <td style="padding: 8px; border: 1px solid #ddd;"><strong>Request:</strong></td>
+            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.name }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px; border: 1px solid #ddd;"><strong>Equipment:</strong></td>
+            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.equipment_id.name }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px; border: 1px solid #ddd;"><strong>Type:</strong></td>
+            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.maintenance_type }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px; border: 1px solid #ddd;"><strong>Priority:</strong></td>
+            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.priority }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px; border: 1px solid #ddd;"><strong>Scheduled Date:</strong></td>
+            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.schedule_date or 'Not scheduled' }}</td>
+        </tr>
+    </table>
+    <p style="margin: 16px 0px;">
+        Please review and take action on this request.
+    </p>
+    <p style="margin: 16px 0px;">
+        <a href="/web#id={{ object.id }}&amp;model=maintenance.request&amp;view_type=form"
+           style="background-color: #875A7B; color: white; padding: 10px 20px; text-decoration: none; border-radius: 3px;">
+            View Request
+        </a>
+    </p>
+    <p style="margin: 16px 0px; color: #888;">
+        Best regards,<br/>
+        GearGuard Maintenance System
+    </p>
+</div>
+        </field>
+    </record>
+
+    <!-- ===================================================================== -->
+    <!-- OVERDUE REQUEST REMINDER                                              -->
+    <!-- ===================================================================== -->
+    <record id="mail_template_request_overdue" model="mail.template">
+        <field name="name">Maintenance Request: Overdue Reminder</field>
+        <field name="model_id" ref="model_maintenance_request"/>
+        <field name="subject">[OVERDUE] Maintenance Request: {{ object.name }}</field>
+        <field name="email_from">{{ (object.company_id.email or user.email) }}</field>
+        <field name="email_to">{{ object.technician_id.email }}</field>
+        <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px; font-size: 14px;">
+    <div style="background-color: #dc3545; color: white; padding: 10px; margin-bottom: 16px;">
+        <strong>OVERDUE MAINTENANCE REQUEST</strong>
+    </div>
+    <p style="margin: 0px; padding: 0px;">
+        Hello {{ object.technician_id.name or 'Team' }},
+    </p>
+    <p style="margin: 16px 0px;">
+        The following maintenance request is <strong style="color: #dc3545;">overdue</strong>:
+    </p>
+    <table style="border-collapse: collapse; width: 100%;">
+        <tr>
+            <td style="padding: 8px; border: 1px solid #ddd;"><strong>Request:</strong></td>
+            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.name }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px; border: 1px solid #ddd;"><strong>Equipment:</strong></td>
+            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.equipment_id.name }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px; border: 1px solid #ddd;"><strong>Scheduled Date:</strong></td>
+            <td style="padding: 8px; border: 1px solid #ddd; color: #dc3545;">{{ object.schedule_date }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px; border: 1px solid #ddd;"><strong>Days Overdue:</strong></td>
+            <td style="padding: 8px; border: 1px solid #ddd; color: #dc3545;">{{ object.days_overdue }}</td>
+        </tr>
+    </table>
+    <p style="margin: 16px 0px;">
+        Please address this request as soon as possible.
+    </p>
+    <p style="margin: 16px 0px;">
+        <a href="/web#id={{ object.id }}&amp;model=maintenance.request&amp;view_type=form"
+           style="background-color: #dc3545; color: white; padding: 10px 20px; text-decoration: none; border-radius: 3px;">
+            View Request
+        </a>
+    </p>
+</div>
+        </field>
+    </record>
+
+    <!-- ===================================================================== -->
+    <!-- WARRANTY EXPIRATION ALERT                                             -->
+    <!-- ===================================================================== -->
+    <record id="mail_template_warranty_alert" model="mail.template">
+        <field name="name">Equipment: Warranty Expiration Alert</field>
+        <field name="model_id" ref="model_maintenance_equipment"/>
+        <field name="subject">[WARRANTY ALERT] {{ object.name }} - Warranty expiring in {{ object.days_to_warranty_end }} days</field>
+        <field name="email_from">{{ (object.company_id.email or user.email) }}</field>
+        <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px; font-size: 14px;">
+    <div style="background-color: #ffc107; color: #000; padding: 10px; margin-bottom: 16px;">
+        <strong>WARRANTY EXPIRATION ALERT</strong>
+    </div>
+    <p style="margin: 16px 0px;">
+        The warranty for the following equipment is expiring soon:
+    </p>
+    <table style="border-collapse: collapse; width: 100%;">
+        <tr>
+            <td style="padding: 8px; border: 1px solid #ddd;"><strong>Equipment:</strong></td>
+            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.name }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px; border: 1px solid #ddd;"><strong>Serial Number:</strong></td>
+            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.serial_number or 'N/A' }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px; border: 1px solid #ddd;"><strong>Warranty Expires:</strong></td>
+            <td style="padding: 8px; border: 1px solid #ddd; color: #ffc107;">{{ object.warranty_date }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px; border: 1px solid #ddd;"><strong>Days Remaining:</strong></td>
+            <td style="padding: 8px; border: 1px solid #ddd;">{{ object.days_to_warranty_end }}</td>
+        </tr>
+    </table>
+    <p style="margin: 16px 0px;">
+        Consider scheduling any warranty-covered maintenance or repairs before expiration.
+    </p>
+    <p style="margin: 16px 0px;">
+        <a href="/web#id={{ object.id }}&amp;model=maintenance.equipment&amp;view_type=form"
+           style="background-color: #875A7B; color: white; padding: 10px 20px; text-decoration: none; border-radius: 3px;">
+            View Equipment
+        </a>
+    </p>
+</div>
+        </field>
+    </record>
+
+</odoo>

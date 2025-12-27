@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+    <!--
+    ============================================================================
+    DEMO DATA - THE GOLDEN DATASET
+    ============================================================================
+
+    File: data/demo_data.xml
+
+    PURPOSE:
+    --------
+    Create compelling demo data for the GearGuard presentation.
+    This data tells a story and demonstrates all key features.
+
+    DEMO SCRIPT:
+    ------------
+    1. Show Kanban with requests in different stages
+    2. Demonstrate auto-fill by creating a new request
+    3. Show smart button on equipment
+    4. Demonstrate scrap workflow
+    5. Show calendar with scheduled maintenance
+    6. Point out overdue requests (red indicators)
+
+    DATA CREATION ORDER (due to dependencies):
+    ------------------------------------------
+    1. Categories (no dependencies)
+    2. Teams (no dependencies)
+    3. Equipment (depends on Categories, Teams)
+    4. Requests (depends on Equipment, Teams)
+
+    IMPORTANT:
+    - Use realistic names and data
+    - Include overdue request for demo
+    - Include request ready to be scrapped
+    - Include equipment with warranty expiring
+    ============================================================================
+    -->
+
+    <!-- ===================================================================== -->
+    <!-- EQUIPMENT CATEGORIES                                                  -->
+    <!-- ===================================================================== -->
+    <record id="category_machinery" model="maintenance.equipment.category">
+        <field name="name">Machinery</field>
+        <field name="color">1</field>
+        <field name="note">Heavy industrial machinery including CNC machines, lathes, and presses.</field>
+    </record>
+
+    <record id="category_vehicles" model="maintenance.equipment.category">
+        <field name="name">Vehicles</field>
+        <field name="color">2</field>
+        <field name="note">Company vehicles including forklifts, trucks, and service vehicles.</field>
+    </record>
+
+    <record id="category_it_equipment" model="maintenance.equipment.category">
+        <field name="name">IT Equipment</field>
+        <field name="color">3</field>
+        <field name="note">Computers, printers, servers, and networking equipment.</field>
+    </record>
+
+    <record id="category_hvac" model="maintenance.equipment.category">
+        <field name="name">HVAC Systems</field>
+        <field name="color">4</field>
+        <field name="note">Heating, ventilation, and air conditioning systems.</field>
+    </record>
+
+    <record id="category_office" model="maintenance.equipment.category">
+        <field name="name">Office Equipment</field>
+        <field name="color">5</field>
+        <field name="note">Office furniture, copiers, and general office equipment.</field>
+    </record>
+
+    <!-- ===================================================================== -->
+    <!-- MAINTENANCE TEAMS                                                     -->
+    <!-- ===================================================================== -->
+    <!--
+    NOTE: member_ids reference res.users records.
+    In demo, we use base.user_admin and base.user_demo if available.
+    You may need to create demo users or adjust these references.
+    -->
+    <record id="team_mechanics" model="maintenance.team">
+        <field name="name">Mechanics</field>
+        <field name="color">1</field>
+        <!-- TODO: Add member_ids when demo users are available
+        <field name="member_ids" eval="[(6, 0, [ref('base.user_admin')])]"/>
+        -->
+    </record>
+
+    <record id="team_it_support" model="maintenance.team">
+        <field name="name">IT Support</field>
+        <field name="color">3</field>
+    </record>
+
+    <record id="team_electricians" model="maintenance.team">
+        <field name="name">Electricians</field>
+        <field name="color">4</field>
+    </record>
+
+    <record id="team_facilities" model="maintenance.team">
+        <field name="name">Facilities</field>
+        <field name="color">5</field>
+    </record>
+
+    <!-- ===================================================================== -->
+    <!-- EQUIPMENT                                                             -->
+    <!-- ===================================================================== -->
+    <!--
+    Each equipment demonstrates different features:
+    - CNC Machine: Has maintenance history, normal state
+    - Laser Cutter: Scheduled for preventive maintenance
+    - Printer: Has overdue request
+    - Laptop: Employee-owned, repaired request
+    - HVAC Unit: Scheduled maintenance tomorrow
+    - Old Machine: Will be scrapped in demo
+    -->
+
+    <!-- CNC Machine - Production department, Mechanics team -->
+    <record id="equipment_cnc_machine" model="maintenance.equipment">
+        <field name="name">CNC Machine #001</field>
+        <field name="serial_number">CNC-2024-001</field>
+        <field name="category_id" ref="category_machinery"/>
+        <field name="maintenance_team_id" ref="team_mechanics"/>
+        <field name="owner_type">department</field>
+        <field name="location">Building A, Production Floor</field>
+        <field name="purchase_date">2023-01-15</field>
+        <field name="warranty_date">2026-01-15</field>
+        <field name="state">operational</field>
+        <field name="notes">&lt;p&gt;High-precision CNC milling machine. Requires monthly lubrication.&lt;/p&gt;</field>
+    </record>
+
+    <!-- Laser Cutter - Production, Mechanics -->
+    <record id="equipment_laser_cutter" model="maintenance.equipment">
+        <field name="name">Laser Cutter #002</field>
+        <field name="serial_number">LC-2024-002</field>
+        <field name="category_id" ref="category_machinery"/>
+        <field name="maintenance_team_id" ref="team_mechanics"/>
+        <field name="owner_type">department</field>
+        <field name="location">Building A, Production Floor</field>
+        <field name="purchase_date">2023-06-01</field>
+        <field name="warranty_date">2025-06-01</field>
+        <field name="state">operational</field>
+    </record>
+
+    <!-- Office Printer - IT Department, IT Support -->
+    <record id="equipment_printer" model="maintenance.equipment">
+        <field name="name">Office Printer HP-500</field>
+        <field name="serial_number">HP-500-12345</field>
+        <field name="category_id" ref="category_it_equipment"/>
+        <field name="maintenance_team_id" ref="team_it_support"/>
+        <field name="owner_type">department</field>
+        <field name="location">Building B, 2nd Floor</field>
+        <field name="purchase_date">2022-03-20</field>
+        <field name="warranty_date">2025-03-20</field>
+        <field name="state">operational</field>
+    </record>
+
+    <!-- Company Laptop - Employee owned, IT Support -->
+    <record id="equipment_laptop" model="maintenance.equipment">
+        <field name="name">Dell Laptop #004</field>
+        <field name="serial_number">DELL-LAP-2024-004</field>
+        <field name="category_id" ref="category_it_equipment"/>
+        <field name="maintenance_team_id" ref="team_it_support"/>
+        <field name="owner_type">employee</field>
+        <field name="location">Mobile</field>
+        <field name="purchase_date">2024-01-10</field>
+        <field name="warranty_date">2027-01-10</field>
+        <field name="state">operational</field>
+    </record>
+
+    <!-- HVAC Unit - Facilities -->
+    <record id="equipment_hvac" model="maintenance.equipment">
+        <field name="name">HVAC Unit Main Building</field>
+        <field name="serial_number">HVAC-MAIN-001</field>
+        <field name="category_id" ref="category_hvac"/>
+        <field name="maintenance_team_id" ref="team_electricians"/>
+        <field name="owner_type">department</field>
+        <field name="location">Rooftop, Main Building</field>
+        <field name="purchase_date">2020-08-15</field>
+        <field name="warranty_date">2025-08-15</field>
+        <field name="state">operational</field>
+    </record>
+
+    <!-- Old Machine - TO BE SCRAPPED (for demo) -->
+    <record id="equipment_old_machine" model="maintenance.equipment">
+        <field name="name">Old Drilling Press</field>
+        <field name="serial_number">OLD-DRILL-1999</field>
+        <field name="category_id" ref="category_machinery"/>
+        <field name="maintenance_team_id" ref="team_mechanics"/>
+        <field name="owner_type">department</field>
+        <field name="location">Building A, Storage</field>
+        <field name="purchase_date">1999-05-01</field>
+        <field name="state">maintenance</field>
+        <field name="notes">&lt;p&gt;Old equipment, frequent breakdowns. Consider replacement.&lt;/p&gt;</field>
+    </record>
+
+    <!-- Equipment with WARRANTY EXPIRING SOON (for demo) -->
+    <record id="equipment_warranty_alert" model="maintenance.equipment">
+        <field name="name">Forklift #007</field>
+        <field name="serial_number">FORK-007</field>
+        <field name="category_id" ref="category_vehicles"/>
+        <field name="maintenance_team_id" ref="team_mechanics"/>
+        <field name="owner_type">department</field>
+        <field name="location">Warehouse</field>
+        <field name="purchase_date">2022-01-15</field>
+        <!-- Set warranty to expire in ~20 days for demo -->
+        <field name="warranty_date" eval="(DateTime.today() + relativedelta(days=20)).strftime('%Y-%m-%d')"/>
+        <field name="state">operational</field>
+    </record>
+
+    <!-- ===================================================================== -->
+    <!-- MAINTENANCE REQUESTS                                                  -->
+    <!-- ===================================================================== -->
+    <!--
+    Requests for different demo scenarios:
+    1. Oil Leak - In Progress (active work)
+    2. Paper Jam - New, OVERDUE (red indicator demo)
+    3. Monthly Checkup - Preventive, scheduled (calendar demo)
+    4. Battery Replacement - Repaired (completed work)
+    5. Filter Cleaning - Preventive, scheduled tomorrow
+    6. Motor Failure - New (for scrap demo)
+    -->
+
+    <!-- Request 1: Oil Leak - In Progress -->
+    <record id="request_oil_leak" model="maintenance.request">
+        <field name="name">Oil Leak in Hydraulic System</field>
+        <field name="description">&lt;p&gt;Noticed oil leaking from the hydraulic system. Machine is operational but needs attention soon.&lt;/p&gt;</field>
+        <field name="equipment_id" ref="equipment_cnc_machine"/>
+        <field name="category_id" ref="category_machinery"/>
+        <field name="maintenance_team_id" ref="team_mechanics"/>
+        <field name="maintenance_type">corrective</field>
+        <field name="stage">in_progress</field>
+        <field name="priority">2</field>
+        <field name="request_date" eval="(DateTime.today() - relativedelta(days=2)).strftime('%Y-%m-%d')"/>
+        <field name="schedule_date" eval="DateTime.today().strftime('%Y-%m-%d')"/>
+        <field name="duration">2.5</field>
+        <field name="cost_parts">150.00</field>
+    </record>
+
+    <!-- Request 2: Paper Jam - OVERDUE (for red indicator demo) -->
+    <record id="request_paper_jam" model="maintenance.request">
+        <field name="name">Paper Jam - Frequent Errors</field>
+        <field name="description">&lt;p&gt;Printer keeps jamming. Error codes P2 and P5 appearing frequently.&lt;/p&gt;</field>
+        <field name="equipment_id" ref="equipment_printer"/>
+        <field name="category_id" ref="category_it_equipment"/>
+        <field name="maintenance_team_id" ref="team_it_support"/>
+        <field name="maintenance_type">corrective</field>
+        <field name="stage">new</field>
+        <field name="priority">1</field>
+        <field name="request_date" eval="(DateTime.today() - relativedelta(days=5)).strftime('%Y-%m-%d')"/>
+        <!-- Schedule date in the past = OVERDUE -->
+        <field name="schedule_date" eval="(DateTime.today() - relativedelta(days=3)).strftime('%Y-%m-%d')"/>
+    </record>
+
+    <!-- Request 3: Monthly Checkup - Preventive, scheduled next week -->
+    <record id="request_monthly_checkup" model="maintenance.request">
+        <field name="name">Monthly Checkup - Laser Cutter</field>
+        <field name="description">&lt;p&gt;Regular monthly preventive maintenance. Check lens alignment, clean filters, verify calibration.&lt;/p&gt;</field>
+        <field name="equipment_id" ref="equipment_laser_cutter"/>
+        <field name="category_id" ref="category_machinery"/>
+        <field name="maintenance_team_id" ref="team_mechanics"/>
+        <field name="maintenance_type">preventive</field>
+        <field name="stage">new</field>
+        <field name="priority">0</field>
+        <field name="request_date" eval="DateTime.today().strftime('%Y-%m-%d')"/>
+        <field name="schedule_date" eval="(DateTime.today() + relativedelta(days=7)).strftime('%Y-%m-%d')"/>
+    </record>
+
+    <!-- Request 4: Battery Replacement - Repaired (completed) -->
+    <record id="request_battery" model="maintenance.request">
+        <field name="name">Battery Replacement</field>
+        <field name="description">&lt;p&gt;Laptop battery no longer holding charge. Replaced with new OEM battery.&lt;/p&gt;</field>
+        <field name="equipment_id" ref="equipment_laptop"/>
+        <field name="category_id" ref="category_it_equipment"/>
+        <field name="maintenance_team_id" ref="team_it_support"/>
+        <field name="maintenance_type">corrective</field>
+        <field name="stage">repaired</field>
+        <field name="priority">1</field>
+        <field name="request_date" eval="(DateTime.today() - relativedelta(days=7)).strftime('%Y-%m-%d')"/>
+        <field name="schedule_date" eval="(DateTime.today() - relativedelta(days=5)).strftime('%Y-%m-%d')"/>
+        <field name="close_date" eval="(DateTime.today() - relativedelta(days=4)).strftime('%Y-%m-%d')"/>
+        <field name="duration">1.0</field>
+        <field name="cost_parts">89.99</field>
+    </record>
+
+    <!-- Request 5: Filter Cleaning - Preventive, tomorrow -->
+    <record id="request_filter_cleaning" model="maintenance.request">
+        <field name="name">Quarterly Filter Cleaning</field>
+        <field name="description">&lt;p&gt;Quarterly cleaning of HVAC filters. Check refrigerant levels.&lt;/p&gt;</field>
+        <field name="equipment_id" ref="equipment_hvac"/>
+        <field name="category_id" ref="category_hvac"/>
+        <field name="maintenance_team_id" ref="team_electricians"/>
+        <field name="maintenance_type">preventive</field>
+        <field name="stage">new</field>
+        <field name="priority">0</field>
+        <field name="request_date" eval="DateTime.today().strftime('%Y-%m-%d')"/>
+        <field name="schedule_date" eval="(DateTime.today() + relativedelta(days=1)).strftime('%Y-%m-%d')"/>
+    </record>
+
+    <!-- Request 6: Motor Failure - FOR SCRAP DEMO -->
+    <record id="request_motor_failure" model="maintenance.request">
+        <field name="name">Motor Failure - Beyond Repair</field>
+        <field name="description">&lt;p&gt;Main motor has failed. Cost of repair exceeds equipment value. Recommend scrapping.&lt;/p&gt;</field>
+        <field name="equipment_id" ref="equipment_old_machine"/>
+        <field name="category_id" ref="category_machinery"/>
+        <field name="maintenance_team_id" ref="team_mechanics"/>
+        <field name="maintenance_type">corrective</field>
+        <field name="stage">in_progress</field>
+        <field name="priority">3</field>
+        <field name="request_date" eval="(DateTime.today() - relativedelta(days=3)).strftime('%Y-%m-%d')"/>
+        <field name="schedule_date" eval="(DateTime.today() - relativedelta(days=1)).strftime('%Y-%m-%d')"/>
+        <field name="duration">8.0</field>
+        <field name="cost_parts">0</field>
+    </record>
+
+    </data>
+</odoo>

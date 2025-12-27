@@ -1,0 +1,211 @@
+Based on the **GearGuard** document, this is clearly an Odoo-centric challenge (references to "Smart Buttons," "Kanban," "Odoo-like," and specific module structures).
+Here is the **Ultimate MVP Model** to secure that win, strictly prioritized to deliver the "Smart Features" and workflows defined in your problem statement.
+
+---
+
+### 🏆 The "GearGuard" Winning MVP Strategy
+
+To win, we focus on **The Happy Path**. We don't build edge cases; we build the exact flow the judges are looking for.
+
+#### 1. The Core Architecture (Data Model)
+
+Do not over-engineer. You need three primary tables (Models) connected exactly as described.
+
+**A. Equipment Model (`maintenance.equipment`)**
+
+*
+**Purpose:** The central database for assets.
+
+
+* **Key Fields:**
+*
+`name`: Char (Name & Serial Number).
+
+
+*
+`category_id`: Selection/Many2one (Department vs. Employee).
+
+
+*
+`technician_id`: Many2one (User) - Default assigned technician.
+
+
+*
+`maintenance_team_id`: Many2one (Team).
+
+
+*
+`location`: Char/Many2one.
+
+
+*
+`warranty_date`: Date.
+
+
+* `active`: Boolean (Critical for the "Scrap" logic).
+
+
+
+**B. Team Model (`maintenance.team`)**
+
+*
+**Purpose:** Grouping technicians.
+
+
+* **Key Fields:**
+*
+`name`: Char (e.g., "Mechanics").
+
+
+*
+`member_ids`: Many2many (Users) - The technicians.
+
+
+
+
+
+**C. Request Model (`maintenance.request`)**
+
+*
+**Purpose:** The transactional ticket.
+
+
+* **Key Fields:**
+*
+`name`: Char (Subject: "Leaking Oil").
+
+
+*
+`equipment_id`: Many2one (`maintenance.equipment`).
+
+
+*
+`request_date`: Date (Scheduled Date).
+
+
+*
+`duration`: Float (Hours Spent).
+
+
+*
+`maintenance_type`: Selection (`corrective`, `preventive`).
+
+
+*
+`stage_id`: Selection (`new`, `in_progress`, `repaired`, `scrap`).
+
+
+
+
+
+---
+
+#### 2. The "Must-Have" Features (The Scoring Criteria)
+
+Hackathons are won on features that "pop" during the demo. Implement these exactly as requested.
+
+**Feature 1: The "Magic" Autofill (High Priority)**
+
+*
+**The Logic:** When a user selects an "Equipment" in a request, the system **must** immediately fetch the *Maintenance Team* from that equipment record and fill it into the request form.
+
+
+* *Dev Tip:* Use an `onchange` event listener on the `equipment_id` field.
+
+**Feature 2: The Smart Button (The "Odoo" Touch)**
+
+*
+**The Logic:** On the Equipment form, add a button labeled "Maintenance".
+
+
+*
+**Function:** It shows a badge count of open requests and, when clicked, opens the list of those specific requests.
+
+
+* *Dev Tip:* This is a classic "computed field" for the count + an `action_window` return for the click event.
+
+**Feature 3: The Scrap Logic (The Detail)**
+
+*
+**The Logic:** If a request stage moves to **Scrap**, the related Equipment must be flagged as unusable.
+
+
+* *Dev Tip:* Override the `write` method on the Request model. If `stage_id` becomes 'scrap', find the linked `equipment_id` and toggle `active = False` or add a `state = 'scrapped'` flag.
+
+---
+
+#### 3. The Interface (UI/UX)
+
+You need two specific views to pass the UX requirement.
+
+**A. The Kanban Board (Home Base)**
+
+*
+**Group By:** `stage_id` (New, In Progress, Repaired, Scrap).
+
+
+* **Visuals:**
+*
+**Drag & Drop:** Enabled by default in Odoo Kanban.
+
+
+*
+**Avatar:** Display the assigned `technician_id` image on the card.
+
+
+*
+**Overdue Flag:** If `request_date` < Today and state != Repaired, make the text Red.
+
+
+
+
+
+**B. The Calendar View**
+
+*
+**Filter:** Show only `maintenance_type = 'preventive'`.
+
+
+*
+**Event:** Display `name` (Subject) on the `request_date`.
+
+
+
+---
+
+#### 4. The 8-Hour Execution Plan (Hackathon Timeline)
+
+| Time | Phase | Focus Action |
+| --- | --- | --- |
+| **Hr 1** | **Scaffolding** | Set up the module structure. Define the 3 Models (`Equipment`, `Team`, `Request`). |
+| **Hr 2** | **Views** | Create the Basic Form and Tree views. Ensure data can be saved. |
+| **Hr 3** | **Kanban** | Build the Kanban view. Add the drag-and-drop stages (`New`, `In Progress`...). Add the user avatar. |
+| **Hr 4** | **Logic Core** | Code the `onchange` (Autofill) and the `Scrap` logic. This is the "brain" of the app. |
+| **Hr 5** | **Smart Button** | Implement the computed field and the button on the Equipment form. |
+| **Hr 6** | **Calendar** | Build the simple Calendar view for Preventive requests. |
+| **Hr 7** | **Demo Data** | **CRITICAL:** Create "Golden Data." 3 Equipments, 2 Teams, 5 Requests (some overdue, some scheduled). Do *not* create data live. |
+| **Hr 8** | **Polish** | Test the "Happy Path" script. Fix only visible bugs. Add icons to menus. |
+
+---
+
+### 💡 The Winner's Secret: The Demo Script
+
+Judges don't inspect your code; they watch your story. Here is your script:
+
+1. **The Hook:** "Maintenance is chaotic. GearGuard brings order."
+2. **The Flow (Corrective):**
+* "I'm a worker. My **Printer** broke." (Create Request).
+*Show Magic:* "Notice how as soon as I select Printer, the **IT Team** is automatically assigned. No manual work.".
+* "I save. It appears in **New** on the Kanban."
+
+3. **The Execution:**
+* "I'm the Technician. I see the ticket." (Drag from New -> In Progress) .
+* "I fix it." (Drag from In Progress -> Repaired).
+
+4. **The Insight:**
+* "Let's look at that Printer." (Go to Equipment Form).
+* "I can instantly see its history via this **Smart Button**." (Click button) .
+
+5. **The Planning (Preventive):**
+* "We also need to prevent fires." (Open Calendar).
+* "Here is our schedule for next week." (Click a date to create a Preventive check) .
