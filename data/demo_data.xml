@@ -3,37 +3,34 @@
     <data noupdate="1">
     <!--
     ============================================================================
-    DEMO DATA - THE GOLDEN DATASET
+    DEMO DATA : THE GOLDEN DATASET
     ============================================================================
 
     File: data/demo_data.xml
 
     PURPOSE:
-    --------
     Create compelling demo data for the GearGuard presentation.
     This data tells a story and demonstrates all key features.
 
     DEMO SCRIPT:
-    ------------
     1. Show Kanban with requests in different stages
-    2. Demonstrate auto-fill by creating a new request
+    2. Demonstrate auto fill by creating a new request
     3. Show smart button on equipment
     4. Demonstrate scrap workflow
     5. Show calendar with scheduled maintenance
     6. Point out overdue requests (red indicators)
 
     DATA CREATION ORDER (due to dependencies):
-    ------------------------------------------
     1. Categories (no dependencies)
     2. Teams (no dependencies)
     3. Equipment (depends on Categories, Teams)
     4. Requests (depends on Equipment, Teams)
 
     IMPORTANT:
-    - Use realistic names and data
-    - Include overdue request for demo
-    - Include request ready to be scrapped
-    - Include equipment with warranty expiring
+    Use realistic names and data
+    Include overdue request for demo
+    Include request ready to be scrapped
+    Include equipment with warranty expiring
     ============================================================================
     -->
 
