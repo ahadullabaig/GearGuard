@@ -110,21 +110,19 @@ class MaintenanceTeam(models.Model):
         help="Users who are part of this maintenance team (technicians)"
     )
 
-    # TODO: Uncomment after maintenance.request is implemented
-    # request_ids = fields.One2many(
-    #     comodel_name='maintenance.request',
-    #     inverse_name='maintenance_team_id',
-    #     string='Maintenance Requests',
-    #     help="All maintenance requests assigned to this team"
-    # )
+    request_ids = fields.One2many(
+        comodel_name='maintenance.request',
+        inverse_name='maintenance_team_id',
+        string='Maintenance Requests',
+        help="All maintenance requests assigned to this team"
+    )
 
-    # TODO: Uncomment after maintenance.equipment is implemented
-    # equipment_ids = fields.One2many(
-    #     comodel_name='maintenance.equipment',
-    #     inverse_name='maintenance_team_id',
-    #     string='Equipment',
-    #     help="Equipment assigned to this team for maintenance"
-    # )
+    equipment_ids = fields.One2many(
+        comodel_name='maintenance.equipment',
+        inverse_name='maintenance_team_id',
+        string='Equipment',
+        help="Equipment assigned to this team for maintenance"
+    )
 
     # ==========================================================================
     # COMPUTED FIELDS
@@ -155,21 +153,15 @@ class MaintenanceTeam(models.Model):
     # COMPUTE METHODS
     # ==========================================================================
 
-    @api.depends('name')  # TODO: Change to 'request_ids', 'request_ids.stage'
+    @api.depends('request_ids', 'request_ids.stage')
     def _compute_request_counts(self):
         """
         Compute open request count and todo (new) request count.
-
-        IMPLEMENTATION:
-        ---------------
-        1. open_request_count: Count requests where stage NOT IN ('repaired', 'scrap')
-        2. todo_request_count: Count requests where stage = 'new'
-
-        Example implementation:
-        ```python
+        """
         for team in self:
             requests = self.env['maintenance.request'].search([
-                ('maintenance_team_id', '=', team.id)
+                ('maintenance_team_id', '=', team.id),
+                ('active', '=', True)
             ])
             team.open_request_count = len(requests.filtered(
                 lambda r: r.stage not in ('repaired', 'scrap')
@@ -177,45 +169,17 @@ class MaintenanceTeam(models.Model):
             team.todo_request_count = len(requests.filtered(
                 lambda r: r.stage == 'new'
             ))
-        ```
 
-        PERFORMANCE TIP:
-        Use read_group for better performance with large datasets:
-        ```python
-        request_data = self.env['maintenance.request'].read_group(
-            domain=[('maintenance_team_id', 'in', self.ids)],
-            fields=['maintenance_team_id', 'stage'],
-            groupby=['maintenance_team_id', 'stage'],
-            lazy=False
-        )
-        ```
-        """
-        # TODO: Implement actual count logic
-        for team in self:
-            team.open_request_count = 0  # Placeholder
-            team.todo_request_count = 0  # Placeholder
-
-    @api.depends('name')  # TODO: Change to 'equipment_ids'
+    @api.depends('equipment_ids')
     def _compute_equipment_count(self):
         """
         Compute the number of equipment assigned to this team.
-
-        IMPLEMENTATION:
-        ---------------
-        Count active equipment where maintenance_team_id = this team.
-
-        Example:
-        ```python
+        """
         for team in self:
             team.equipment_count = self.env['maintenance.equipment'].search_count([
                 ('maintenance_team_id', '=', team.id),
                 ('active', '=', True)
             ])
-        ```
-        """
-        # TODO: Implement actual count logic
-        for team in self:
-            team.equipment_count = 0  # Placeholder
 
     # ==========================================================================
     # ACTION METHODS
@@ -224,13 +188,7 @@ class MaintenanceTeam(models.Model):
     def action_view_requests(self):
         """
         Smart button action to view all requests for this team.
-
-        IMPLEMENTATION:
-        ---------------
-        Return action window showing requests filtered by this team.
-
-        Example:
-        ```python
+        """
         self.ensure_one()
         return {
             'type': 'ir.actions.act_window',
@@ -238,28 +196,22 @@ class MaintenanceTeam(models.Model):
             'res_model': 'maintenance.request',
             'view_mode': 'kanban,tree,form,calendar',
             'domain': [('maintenance_team_id', '=', self.id)],
-            'context': {
-                'default_maintenance_team_id': self.id,
-                'search_default_todo': 1,  # Pre-filter to show new requests
-            },
+            'context': {'default_maintenance_team_id': self.id},
         }
-        ```
-        """
-        # TODO: Implement action
-        self.ensure_one()
-        return {}
 
     def action_view_equipment(self):
         """
         Smart button action to view equipment assigned to this team.
-
-        IMPLEMENTATION:
-        ---------------
-        Return action window showing equipment filtered by this team.
         """
-        # TODO: Implement action
         self.ensure_one()
-        return {}
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Equipment'),
+            'res_model': 'maintenance.equipment',
+            'view_mode': 'tree,form,kanban',
+            'domain': [('maintenance_team_id', '=', self.id)],
+            'context': {'default_maintenance_team_id': self.id},
+        }
 
     # ==========================================================================
     # HELPER METHODS

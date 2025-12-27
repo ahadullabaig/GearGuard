@@ -65,11 +65,8 @@
         <field name="model_id" ref="model_maintenance_equipment"/>
         <field name="state">code</field>
         <field name="code">
-# TODO: Implement this method in maintenance.equipment model
-# model._cron_send_warranty_alerts()
-
-# Placeholder implementation:
 from datetime import timedelta
+
 today = fields.Date.today()
 alert_threshold = today + timedelta(days=30)
 
@@ -79,10 +76,11 @@ equipment_to_alert = model.search([
     ('active', '=', True),
 ])
 
-# TODO: Send emails and log alerts
-# for eq in equipment_to_alert:
-#     template = env.ref('gearguard.mail_template_warranty_alert')
-#     template.send_mail(eq.id, force_send=True)
+# Send warranty alert emails
+template = env.ref('gearguard.mail_template_warranty_alert', raise_if_not_found=False)
+if template:
+    for eq in equipment_to_alert:
+        template.send_mail(eq.id, force_send=True)
         </field>
         <field name="interval_number">1</field>
         <field name="interval_type">days</field>
@@ -103,7 +101,6 @@ equipment_to_alert = model.search([
         <field name="model_id" ref="model_maintenance_request"/>
         <field name="state">code</field>
         <field name="code">
-# TODO: Implement reminder for tomorrow's scheduled maintenance
 from datetime import timedelta
 
 tomorrow = fields.Date.today() + timedelta(days=1)
@@ -114,10 +111,11 @@ upcoming = model.search([
     ('maintenance_type', '=', 'preventive'),
 ])
 
-# TODO: Send reminder emails
-# for request in upcoming:
-#     # Send notification
-#     pass
+# Send reminder emails to assigned technicians
+template = env.ref('gearguard.mail_template_request_scheduled', raise_if_not_found=False)
+if template:
+    for request in upcoming:
+        template.send_mail(request.id, force_send=True)
         </field>
         <field name="interval_number">1</field>
         <field name="interval_type">days</field>
