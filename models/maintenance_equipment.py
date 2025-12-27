@@ -246,13 +246,12 @@ class MaintenanceEquipment(models.Model):
     # RELATIONAL FIELDS
     # ==========================================================================
 
-    # TODO: Uncomment after maintenance.request is implemented
-    # request_ids = fields.One2many(
-    #     comodel_name='maintenance.request',
-    #     inverse_name='equipment_id',
-    #     string='Maintenance Requests',
-    #     help="All maintenance requests for this equipment"
-    # )
+    request_ids = fields.One2many(
+        comodel_name='maintenance.request',
+        inverse_name='equipment_id',
+        string='Maintenance Requests',
+        help="All maintenance requests for this equipment"
+    )
 
     # ==========================================================================
     # COMPUTED FIELDS - REQUEST COUNTS
@@ -339,32 +338,20 @@ class MaintenanceEquipment(models.Model):
     # COMPUTE METHODS
     # ==========================================================================
 
-    @api.depends('name')  # TODO: Change to 'request_ids', 'request_ids.stage'
+    @api.depends('request_ids', 'request_ids.stage')
     def _compute_request_counts(self):
         """
         Compute total and open request counts for smart button.
-
-        IMPLEMENTATION:
-        ---------------
-        1. request_count: Count all requests linked to this equipment
-        2. open_request_count: Count requests where stage NOT IN ('repaired', 'scrap')
-
-        Example:
-        ```python
+        """
         for equipment in self:
             requests = self.env['maintenance.request'].search([
-                ('equipment_id', '=', equipment.id)
+                ('equipment_id', '=', equipment.id),
+                ('active', '=', True)
             ])
             equipment.request_count = len(requests)
             equipment.open_request_count = len(requests.filtered(
                 lambda r: r.stage not in ('repaired', 'scrap')
             ))
-        ```
-        """
-        # TODO: Implement actual count logic
-        for equipment in self:
-            equipment.request_count = 0
-            equipment.open_request_count = 0
 
     @api.depends('warranty_date')
     def _compute_warranty_alert(self):
@@ -403,38 +390,35 @@ class MaintenanceEquipment(models.Model):
                 else:
                     equipment.warranty_state = 'valid'
 
-    @api.depends('name')  # TODO: Change to 'request_ids', 'request_ids.cost_total', etc.
+    @api.depends('request_ids', 'request_ids.cost_total', 'request_ids.duration', 'request_ids.close_date', 'request_ids.stage')
     def _compute_maintenance_stats(self):
         """
         Compute maintenance statistics for equipment history.
-
-        IMPLEMENTATION:
-        ---------------
-        1. total_maintenance_cost: SUM of request.cost_total
-        2. total_downtime: SUM of request.duration
-        3. last_maintenance_date: MAX of request.close_date where stage='repaired'
-        4. mtbf: Calculate Mean Time Between Failures
-
-        MTBF CALCULATION:
-        ```python
-        # Get all corrective maintenance requests sorted by date
-        corrective_requests = requests.filtered(
-            lambda r: r.maintenance_type == 'corrective' and r.close_date
-        ).sorted('close_date')
-
-        if len(corrective_requests) > 1:
-            first_date = corrective_requests[0].close_date
-            last_date = corrective_requests[-1].close_date
-            total_days = (last_date - first_date).days
-            mtbf = total_days / (len(corrective_requests) - 1)
-        ```
         """
-        # TODO: Implement actual statistics calculation
         for equipment in self:
-            equipment.total_maintenance_cost = 0.0
-            equipment.total_downtime = 0.0
-            equipment.last_maintenance_date = False
-            equipment.mtbf = 0.0
+            requests = self.env['maintenance.request'].search([
+                ('equipment_id', '=', equipment.id),
+                ('stage', '=', 'repaired'),
+                ('active', '=', True)
+            ])
+            equipment.total_maintenance_cost = sum(requests.mapped('cost_total'))
+            equipment.total_downtime = sum(requests.mapped('duration'))
+
+            if requests:
+                equipment.last_maintenance_date = max(requests.mapped('close_date') or [False])
+                # MTBF calculation (average days between repairs)
+                close_dates = sorted([r.close_date for r in requests if r.close_date])
+                if len(close_dates) > 1:
+                    deltas = [(close_dates[i+1] - close_dates[i]).days
+                              for i in range(len(close_dates)-1)]
+                    equipment.mtbf = sum(deltas) / len(deltas)
+                else:
+                    equipment.mtbf = 0
+            else:
+                equipment.total_maintenance_cost = 0
+                equipment.total_downtime = 0
+                equipment.last_maintenance_date = False
+                equipment.mtbf = 0
 
     # ==========================================================================
     # ONCHANGE METHODS
