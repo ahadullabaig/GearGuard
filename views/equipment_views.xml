@@ -86,18 +86,19 @@
                 <sheet>
                     <!-- SMART BUTTON BOX - CRITICAL! -->
                     <div class="oe_button_box" name="button_box">
-                        <!-- TODO: Implement smart button
                         <button name="action_view_requests"
                                 type="object"
                                 class="oe_stat_button"
                                 icon="fa-wrench">
                             <field name="open_request_count" widget="statinfo" string="Maintenance"/>
                         </button>
-                        -->
                     </div>
 
                     <!-- STATE RIBBONS -->
-                    <!-- TODO: Add ribbons for scrapped/maintenance states -->
+                    <widget name="web_ribbon" title="Scrapped" bg_color="bg-danger"
+                            invisible="state != 'scrapped'"/>
+                    <widget name="web_ribbon" title="Under Maintenance" bg_color="bg-warning"
+                            invisible="state != 'maintenance'"/>
 
                     <!-- EQUIPMENT IMAGE -->
                     <field name="image" widget="image" class="oe_avatar"
@@ -112,13 +113,11 @@
                     </div>
 
                     <!-- WARRANTY ALERT BANNER -->
-                    <!-- TODO: Add warning banner when warranty_alert is True
                     <div class="alert alert-warning" role="alert"
                          invisible="not warranty_alert">
                         <strong>Warning!</strong> Warranty expires in
                         <field name="days_to_warranty_end"/> days
                     </div>
-                    -->
 
                     <group>
                         <group string="Classification">

@@ -50,10 +50,10 @@
             <t t-name="kanban-box">
                 <div t-attf-class="oe_kanban_card oe_kanban_global_click
                                    #{record.is_overdue.raw_value ? 'oe_kanban_overdue' : ''}">
-                    <!-- Priority Ribbon -->
+                    [Priority Ribbon]
                     <div t-attf-class="oe_kanban_ribbon oe_kanban_ribbon_#{record.priority.raw_value}"/>
 
-                    <!-- Card Content -->
+                    [Card Content]
                     <div class="oe_kanban_content">
                         <div class="o_kanban_record_top">
                             <strong><field name="name"/></strong>

@@ -41,7 +41,7 @@ DEMO DATA NEEDED:
 - "Office Equipment" (color: 5)
 """
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 
 
 class MaintenanceEquipmentCategory(models.Model):
@@ -76,13 +76,12 @@ class MaintenanceEquipmentCategory(models.Model):
     # RELATIONAL FIELDS
     # ==========================================================================
 
-    # TODO: Uncomment after maintenance.equipment is implemented
-    # equipment_ids = fields.One2many(
-    #     comodel_name='maintenance.equipment',
-    #     inverse_name='category_id',
-    #     string='Equipment',
-    #     help="List of equipment belonging to this category"
-    # )
+    equipment_ids = fields.One2many(
+        comodel_name='maintenance.equipment',
+        inverse_name='category_id',
+        string='Equipment',
+        help="List of equipment belonging to this category"
+    )
 
     # ==========================================================================
     # COMPUTED FIELDS
@@ -99,31 +98,19 @@ class MaintenanceEquipmentCategory(models.Model):
     # COMPUTE METHODS
     # ==========================================================================
 
-    @api.depends('name')  # TODO: Change to depends on equipment_ids after implementation
+    @api.depends('equipment_ids')
     def _compute_equipment_count(self):
         """
         Compute the number of equipment in each category.
-
-        IMPLEMENTATION:
-        ---------------
-        1. Use read_group for efficiency with large datasets
-        2. Count only active equipment (active=True)
-
-        Example implementation:
-        ```python
+        """
         equipment_data = self.env['maintenance.equipment'].read_group(
             domain=[('category_id', 'in', self.ids), ('active', '=', True)],
             fields=['category_id'],
             groupby=['category_id']
         )
-        mapped_data = {data['category_id'][0]: data['category_id_count'] for data in equipment_data}
+        mapped_data = {x['category_id'][0]: x['category_id_count'] for x in equipment_data}
         for category in self:
             category.equipment_count = mapped_data.get(category.id, 0)
-        ```
-        """
-        # TODO: Implement actual count logic
-        for category in self:
-            category.equipment_count = 0  # Placeholder
 
     # ==========================================================================
     # ACTION METHODS
@@ -132,25 +119,16 @@ class MaintenanceEquipmentCategory(models.Model):
     def action_view_equipment(self):
         """
         Smart button action to view equipment in this category.
-
-        IMPLEMENTATION:
-        ---------------
-        Return an action window that shows equipment filtered by this category.
-
-        Example:
-        ```python
+        """
+        self.ensure_one()
         return {
             'type': 'ir.actions.act_window',
             'name': _('Equipment'),
             'res_model': 'maintenance.equipment',
-            'view_mode': 'kanban,tree,form',
+            'view_mode': 'tree,form,kanban',
             'domain': [('category_id', '=', self.id)],
             'context': {'default_category_id': self.id},
         }
-        ```
-        """
-        # TODO: Implement action
-        pass
 
     # ==========================================================================
     # CRUD OVERRIDES (if needed)

@@ -81,7 +81,14 @@
         <field name="arch" type="xml">
             <form string="Maintenance Team">
                 <sheet>
-                    <!-- TODO: Add smart buttons -->
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" name="action_view_requests" icon="fa-wrench">
+                            <field string="Requests" name="open_request_count" widget="statinfo"/>
+                        </button>
+                        <button class="oe_stat_button" type="object" name="action_view_equipment" icon="fa-cogs">
+                            <field string="Equipment" name="equipment_count" widget="statinfo"/>
+                        </button>
+                    </div>
                     <div class="oe_title">
                         <h1><field name="name" placeholder="Team Name..."/></h1>
                     </div>
@@ -222,6 +229,7 @@
         <field name="name">Maintenance Teams</field>
         <field name="res_model">maintenance.team</field>
         <field name="view_mode">kanban,tree,form</field>
+        <field name="search_view_id" ref="maintenance_team_search"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create your first maintenance team

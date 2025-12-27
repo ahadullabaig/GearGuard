@@ -200,8 +200,6 @@ class MaintenanceReport(models.Model):
         """
         tools.drop_view_if_exists(self.env.cr, self._table)
 
-        # TODO: Implement actual SQL VIEW
-        # For now, create a simple view
         self.env.cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
                 SELECT
@@ -223,7 +221,7 @@ class MaintenanceReport(models.Model):
                     r.cost_total AS cost_total,
                     CASE
                         WHEN r.close_date IS NOT NULL AND r.request_date IS NOT NULL
-                        THEN r.close_date - r.request_date
+                        THEN (r.close_date - r.request_date)::INTEGER
                         ELSE NULL
                     END AS resolution_days,
                     1 AS request_count,

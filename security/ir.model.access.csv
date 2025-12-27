@@ -50,12 +50,11 @@ access_maintenance_request_manager,maintenance.request.manager,model_maintenance
 # ------------------------------------------------------------------------------
 # Wizard (Transient Models)
 # ------------------------------------------------------------------------------
-# TODO: Add wizard access when implemented
-# access_warranty_alert_wizard_manager,maintenance.warranty.alert.wizard.manager,model_maintenance_warranty_alert_wizard,gearguard.group_maintenance_manager,1,1,1,1
+access_warranty_alert_wizard_user,maintenance.warranty.alert.wizard.user,model_maintenance_warranty_alert_wizard,gearguard.group_maintenance_user,1,1,1,0
+access_warranty_alert_wizard_manager,maintenance.warranty.alert.wizard.manager,model_maintenance_warranty_alert_wizard,gearguard.group_maintenance_manager,1,1,1,1
 
 # ------------------------------------------------------------------------------
 # Report (Analysis Models)
 # ------------------------------------------------------------------------------
-# TODO: Add report access when implemented
-# access_maintenance_report_user,maintenance.report.user,model_maintenance_report,gearguard.group_maintenance_user,1,0,0,0
-# access_maintenance_report_manager,maintenance.report.manager,model_maintenance_report,gearguard.group_maintenance_manager,1,1,1,1
+access_maintenance_report_user,maintenance.report.user,model_maintenance_report,gearguard.group_maintenance_user,1,0,0,0
+access_maintenance_report_manager,maintenance.report.manager,model_maintenance_report,gearguard.group_maintenance_manager,1,1,1,1

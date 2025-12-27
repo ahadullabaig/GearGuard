@@ -145,6 +145,7 @@
         <field name="model_id" ref="model_maintenance_equipment"/>
         <field name="subject">[WARRANTY ALERT] {{ object.name }} - Warranty expiring in {{ object.days_to_warranty_end }} days</field>
         <field name="email_from">{{ (object.company_id.email or user.email) }}</field>
+        <field name="email_to">{{ object.maintenance_team_id.email or object.company_id.email or user.email }}</field>
         <field name="body_html" type="html">
 <div style="margin: 0px; padding: 0px; font-size: 14px;">
     <div style="background-color: #ffc107; color: #000; padding: 10px; margin-bottom: 16px;">
