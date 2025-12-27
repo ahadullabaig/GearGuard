@@ -191,8 +191,12 @@ class WarrantyAlertWizard(models.TransientModel):
         if not self.equipment_ids:
             raise UserError(_("Please select at least one equipment."))
 
-        # TODO: Implement actual email sending
-        # For now, just log a message
+        # Send emails using template if available
+        if self.template_id:
+            for equipment in self.equipment_ids:
+                self.template_id.send_mail(equipment.id, force_send=True)
+
+        # Log a message on each equipment
         for equipment in self.equipment_ids:
             equipment.message_post(
                 body=_("Warranty alert notification (wizard triggered)."),

@@ -110,21 +110,19 @@ class MaintenanceTeam(models.Model):
         help="Users who are part of this maintenance team (technicians)"
     )
 
-    # TODO: Uncomment after maintenance.request is implemented
-    # request_ids = fields.One2many(
-    #     comodel_name='maintenance.request',
-    #     inverse_name='maintenance_team_id',
-    #     string='Maintenance Requests',
-    #     help="All maintenance requests assigned to this team"
-    # )
+    request_ids = fields.One2many(
+        comodel_name='maintenance.request',
+        inverse_name='maintenance_team_id',
+        string='Maintenance Requests',
+        help="All maintenance requests assigned to this team"
+    )
 
-    # TODO: Uncomment after maintenance.equipment is implemented
-    # equipment_ids = fields.One2many(
-    #     comodel_name='maintenance.equipment',
-    #     inverse_name='maintenance_team_id',
-    #     string='Equipment',
-    #     help="Equipment assigned to this team for maintenance"
-    # )
+    equipment_ids = fields.One2many(
+        comodel_name='maintenance.equipment',
+        inverse_name='maintenance_team_id',
+        string='Equipment',
+        help="Equipment assigned to this team for maintenance"
+    )
 
     # ==========================================================================
     # COMPUTED FIELDS
@@ -155,7 +153,7 @@ class MaintenanceTeam(models.Model):
     # COMPUTE METHODS
     # ==========================================================================
 
-    @api.depends('name')  # TODO: Change to 'request_ids', 'request_ids.stage'
+    @api.depends('request_ids', 'request_ids.stage')
     def _compute_request_counts(self):
         """
         Compute open request count and todo (new) request count.
@@ -190,12 +188,19 @@ class MaintenanceTeam(models.Model):
         )
         ```
         """
-        # TODO: Implement actual count logic
         for team in self:
-            team.open_request_count = 0  # Placeholder
-            team.todo_request_count = 0  # Placeholder
+            requests = self.env['maintenance.request'].search([
+                ('maintenance_team_id', '=', team.id),
+                ('active', '=', True)
+            ])
+            team.open_request_count = len(requests.filtered(
+                lambda r: r.stage not in ('repaired', 'scrap')
+            ))
+            team.todo_request_count = len(requests.filtered(
+                lambda r: r.stage == 'new'
+            ))
 
-    @api.depends('name')  # TODO: Change to 'equipment_ids'
+    @api.depends('equipment_ids')
     def _compute_equipment_count(self):
         """
         Compute the number of equipment assigned to this team.
@@ -213,9 +218,11 @@ class MaintenanceTeam(models.Model):
             ])
         ```
         """
-        # TODO: Implement actual count logic
         for team in self:
-            team.equipment_count = 0  # Placeholder
+            team.equipment_count = self.env['maintenance.equipment'].search_count([
+                ('maintenance_team_id', '=', team.id),
+                ('active', '=', True)
+            ])
 
     # ==========================================================================
     # ACTION METHODS
@@ -245,9 +252,15 @@ class MaintenanceTeam(models.Model):
         }
         ```
         """
-        # TODO: Implement action
         self.ensure_one()
-        return {}
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Maintenance Requests'),
+            'res_model': 'maintenance.request',
+            'view_mode': 'kanban,tree,form,calendar',
+            'domain': [('maintenance_team_id', '=', self.id)],
+            'context': {'default_maintenance_team_id': self.id},
+        }
 
     def action_view_equipment(self):
         """
@@ -257,9 +270,15 @@ class MaintenanceTeam(models.Model):
         ---------------
         Return action window showing equipment filtered by this team.
         """
-        # TODO: Implement action
         self.ensure_one()
-        return {}
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Equipment'),
+            'res_model': 'maintenance.equipment',
+            'view_mode': 'tree,form,kanban',
+            'domain': [('maintenance_team_id', '=', self.id)],
+            'context': {'default_maintenance_team_id': self.id},
+        }
 
     # ==========================================================================
     # HELPER METHODS
